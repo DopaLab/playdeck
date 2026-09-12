@@ -15,3 +15,4 @@ Preview*
 !docs/*.bench.json
 SHA256SUMS.txt
 installer-*.txt
+package-validation.txt
