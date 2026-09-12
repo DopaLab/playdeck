@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+Portable/
+work/
+*.user
+*.suo
+*.exe
+*.zip
+*.pdb
+*.log
+build-log.txt
+Tests.txt
+Preview*
+*.bench.json
+!docs/*.bench.json
+SHA256SUMS.txt
+installer-*.txt

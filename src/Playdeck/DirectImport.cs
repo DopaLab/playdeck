@@ -1,0 +1,26 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Microsoft.Win32;
+using Playdeck.Core;
+namespace Playdeck;
+public sealed partial class MainWindow {
+ readonly Queue<string> importQueue=new();bool importing;
+ public void QueueImports(IEnumerable<string> files){foreach(var path in files.Where(p=>!string.IsNullOrWhiteSpace(p)).Take(100))importQueue.Enqueue(path);if(importing)return;importing=true;try{while(importQueue.Count>0)ImportOne(importQueue.Dequeue());}finally{importing=false;}}
+ void ImportOne(string path){
+ if(!File.Exists(path)){status.Text="File unavailable: "+path;return;}
+ var game=Discovery.Read(path,true);if(game==null){status.Text="Choose an executable, an executable shortcut, or a supported game URL shortcut.";return;}
+ var existing=library.Games.FirstOrDefault(g=>string.Equals(g.LaunchPath,game.LaunchPath,StringComparison.OrdinalIgnoreCase)||(game.TrackPath.Length>0&&string.Equals(g.TrackPath,game.TrackPath,StringComparison.OrdinalIgnoreCase)&&g.Arguments==game.Arguments));
+ if(existing!=null){if(existing.Removed)LibraryActions.Restore(library,existing);view=existing.Archived?"Archived":"Library";search.Text=existing.Name;Save();Render();status.Text="Already in your library: "+existing.Name;return;}
+ var body=new StackPanel();body.Children.Add(Text("ONE MORE ADVENTURE",25,"#E1FF46",FontWeights.Black));var hint=Text("Check the title before adding. Playdeck will use it to find the cover; you can always change it later.",14,"#BDBDBD");hint.Margin=new Thickness(0,12,0,20);body.Children.Add(hint);CacheIcon(game);var icon=LoadImage(CachedIcon(game),72);if(icon!=null)body.Children.Add(new Image{Source=icon,Width=64,Height=64,HorizontalAlignment=HorizontalAlignment.Left,Margin=new Thickness(0,0,0,16)});
+ body.Children.Add(Text("GAME TITLE",11,"#ADADAD",FontWeights.Bold));var name=new TextBox{Text=game.Name,Margin=new Thickness(0,8,0,16)};body.Children.Add(name);body.Children.Add(Text(game.LaunchPath,12,"#999999"));var error=Text("",12,"#FF6246");error.Margin=new Thickness(0,12,0,0);body.Children.Add(error);
+ var dialog=Dialog("Add to Playdeck",body,560);var actions=new WrapPanel{Margin=new Thickness(0,18,0,0)};actions.Children.Add(Btn("Add to library",()=>{if(string.IsNullOrWhiteSpace(name.Text)){error.Text="Give this game a title first.";return;}game.Name=name.Text.Trim();library.Games.Add(game);library.Ignored.Remove(game.LaunchPath);Save();view="Library";search.Text="";dialog.Close();Render();_=Enrich();},true));actions.Children.Add(Btn("Cancel",()=>dialog.Close()));body.Children.Add(actions);dialog.ContentRendered+=(_,_)=>{name.Focus();name.SelectAll();};dialog.ShowDialog();
+ }
+ void EditProfile(){var body=new StackPanel();body.Children.Add(Text("YOUR PLAYER CARD",26,"#E1FF46",FontWeights.Black));body.Children.Add(Text("Your name. Your picture. Saved only on this PC.",14,"#BDBDBD"));string avatar=library.AvatarPath;var preview=new Image{Source=LoadImage(avatar,128)??brandIcon,Width=92,Height=92,Margin=new Thickness(0,20,0,16),HorizontalAlignment=HorizontalAlignment.Left};body.Children.Add(preview);var name=new TextBox{Text=library.UserName,MaxLength=32,Margin=new Thickness(0,10,0,18)};body.Children.Add(Text("USERNAME",11));body.Children.Add(name);var dialog=Dialog("Player profile",body,480);body.Children.Add(Btn("Choose picture",()=>{var picker=new OpenFileDialog{Filter="Images|*.png;*.jpg;*.jpeg;*.webp;*.bmp"};if(picker.ShowDialog(dialog)!=true)return;var image=LoadImage(picker.FileName,512);if(image==null){MessageBox.Show(dialog,"This image could not be opened.","Profile");return;}Directory.CreateDirectory(Path.Combine(root,"profile"));avatar=Path.Combine(root,"profile",Guid.NewGuid().ToString("N")+".png");var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(image));using(var stream=File.Create(avatar))encoder.Save(stream);preview.Source=image;}));var actions=new WrapPanel{Margin=new Thickness(0,22,0,0)};actions.Children.Add(Btn("Save profile",()=>{library.UserName=string.IsNullOrWhiteSpace(name.Text)?"Player one":name.Text.Trim();library.AvatarPath=avatar;Save();UpdateProfile();dialog.Close();},true));actions.Children.Add(Btn("Cancel",()=>dialog.Close()));body.Children.Add(actions);dialog.ShowDialog();}
+ void IntegrationSettings(){var section=Section("RIGHT-CLICK. ADD. PLAY.","Add any executable or shortcut straight from Windows Explorer. Review its name once; the cover and play history stay with your card.");var state=Text(ExplorerIntegration.Installed?"Explorer menu is enabled for this copy of Playdeck.":"Enable the Explorer menu after placing Playdeck in its permanent folder.",14,"#E1FF46");section.Children.Add(state);var row=new WrapPanel{Margin=new Thickness(0,18,0,10)};row.Children.Add(Btn(ExplorerIntegration.Installed?"Repair / update menu":"Enable Explorer menu",()=>{ExplorerIntegration.Install();Render();},true));row.Children.Add(Btn("Remove Explorer menu",()=>{ExplorerIntegration.Remove();Render();}));row.Children.Add(Btn("Choose game files",AddGames));section.Children.Add(row);section.Children.Add(Text("On Windows 11, choose Show more options in the right-click menu. No folder scanning, startup service or administrator access required.",12,"#AAAAAA"));}
+}

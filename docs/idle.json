@@ -1,0 +1,6 @@
+{
+  "InputIdleReached": true,
+  "WarmInputIdleMilliseconds": 2164.8309,
+  "IdleCpuSecondsOver10Seconds": 0.109375,
+  "WorkingSetMiB": 128.34765625
+}
