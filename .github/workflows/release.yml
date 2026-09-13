@@ -1,0 +1,37 @@
+name: Package release
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: 10.0.x
+      - name: Install packaging compiler
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
+          if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed' }
+          $compiler = Get-ChildItem 'C:/Program Files (x86)/Inno Setup*/ISCC.exe','C:/Program Files/Inno Setup*/ISCC.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (!$compiler) { throw 'Inno Setup compiler not found' }
+          $compiler.DirectoryName | Out-File $env:GITHUB_PATH -Append
+      - name: Build and validate
+        shell: pwsh
+        run: ./build.ps1 -Installer
+      - name: Package and upload to draft
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory release-out | Out-Null
+          Copy-Item ../Playdeck-Setup-6.0.0.exe release-out/
+          Compress-Archive -Path Portable/* -DestinationPath release-out/Playdeck-v6.0.0-win-x64.zip
+          git archive --format=zip --output=release-out/Playdeck-v6.0.0-source.zip HEAD
+          Get-FileHash release-out/* -Algorithm SHA256 | ForEach-Object { $_.Hash.ToLower()+'  '+[IO.Path]::GetFileName($_.Path) } | Set-Content release-out/SHA256SUMS.txt
+          gh release upload v6.0.0 release-out/* --repo DopaLab/playdeck --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed' }
