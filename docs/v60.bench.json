@@ -1,0 +1,13 @@
+{
+  "Games": 2000,
+  "Sessions": 20000,
+  "ScrollSteps": 100,
+  "RenderMedianMs": 130.1319,
+  "ScrollMedianMs": 1.1966,
+  "ScrollP95Ms": 23.6489,
+  "DecodedImages": 0,
+  "AllocatedMB": 29.768768310546875,
+  "MaxRealizedCards": 25,
+  "ElapsedSeconds": 1.9306911,
+  "WorkingSetMB": 147.3828125
+}

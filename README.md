@@ -9,7 +9,7 @@
 
 <h3 align="center">Your games deserve a better shelf.</h3>
 <p align="center">A personal Windows launcher with bold cover cards, instant favorites and local play history.<br>No account. No folder crawler. No always-running launcher.</p>
-<p align="center"><b><a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-Setup-6.0.0.exe">↓ Install Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-v6.0.0-win-x64.zip">Portable ZIP</a> · <a href="#your-library-in-motion">See the app</a></b></p>
+<p align="center"><b><a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-Setup-6.1.0.exe">↓ Install Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-v6.1.0-win-x64.zip">Portable ZIP</a> · <a href="#your-library-in-motion">See the app</a></b></p>
 
 ## Your library, in motion
 
@@ -17,7 +17,7 @@
 
 <table>
 <tr><td width="50%"><b>01 / Make it yours</b><br>Right-click a game in Explorer → Add to Playdeck. Choose a Steam match for artwork, or paste your own cover. Your profile, your order, your library.</td><td width="50%"><b>02 / Get straight to the game</b><br>Click a card to launch. Use its three dots to edit. Pin favorites to a separate shelf and drag them into order. The launcher closes after a successful launch.</td></tr>
-<tr><td><b>03 / Keep your story</b><br>Playtime, session history, weekly comparisons and a daily chart. New sessions distinguish foreground from background time and split across midnight.</td><td><b>04 / Keep it recoverable</b><br>Archive without losing cached art or history. Trash cards for seven days, restore mistakes, or empty the trash. Installed game files are never deleted.</td></tr>
+<tr><td><b>03 / Keep your story</b><br>Playtime, 7/30/90-day comparisons, a 90-day calendar, focus ring, game rankings and session history. New sessions distinguish foreground from background time and split across midnight.</td><td><b>04 / Keep it recoverable</b><br>Archive without losing cached art or history. Trash cards for seven days, restore mistakes, or empty the trash. Installed game files are never deleted.</td></tr>
 </table>
 
 <details open><summary><b>Activity & favorites — actual application captures</b></summary>
@@ -42,7 +42,7 @@ The banner is AI-generated promotional art. Application images are real WPF capt
 
 ## Built to do less work
 
-- **Continuous, virtualized scrolling:** only nearby cards exist; overlapping rows survive scroll updates.
+- **Continuous, virtualized scrolling:** nearby cards are drawn on lightweight surfaces; overlapping rows survive updates and up to 72 nearby controls are reused (or more if needed for the visible viewport). Idle work prewarms adjacent rows.
 - **Decoded artwork reuse:** frozen bitmaps in a bounded 48 MiB / 160-entry LRU cache. File changes invalidate entries. This is a cache budget, not a total RAM promise.
 - **Indexed history:** cards look up their game's sessions instead of repeatedly scanning the entire history.
 - **Quieter UI:** focus changes reload history only when the session directory changes; resizing coalesces expensive rebuilds.
@@ -51,15 +51,28 @@ The banner is AI-generated promotional art. Application images are real WPF capt
 
 Same-machine synthetic test: 2,000 games, 20,000 sessions, eight preloaded covers, five refreshes and 100 scroll steps.
 
-| WPF workload | v5 baseline | v6 optimized |
+| WPF workload | v6.0 | v6.1 |
 |---|---:|---:|
-| Median library refresh | 1,086 ms | 76 ms |
-| 95th-percentile scroll layout update | 158 ms | 32 ms |
-| Managed allocation during workload | 118.6 MiB | 29.9 MiB |
-| Repeated image decodes during workload | 1,020 | 0 |
+| Median library refresh | 130 ms | 40 ms |
+| 95th-percentile scroll layout update | 23.6 ms | 12.3 ms |
+| Managed allocation during workload | 29.8 MiB | 15.1 MiB |
+| Repeated image decodes | 0 | 0 |
 | Maximum realized cards | 25 | 25 |
 
-These are local layout measurements, **not GPU frame rates or a cold-start guarantee**. Ordinary median scroll updates were 1.0 ms in v5 and 1.8 ms in v6; the improvement is in refreshes and expensive row transitions. Larger sets of unique covers can evict cached images. See [method and raw results](docs/PERFORMANCE.md).
+Local synthetic layout measurements, **not GPU frame rates or universal guarantees**. Median scroll updates were 1.2 ms and 1.0 ms. Working-set snapshots were 147 and 151 MiB: this change reduces rendering work and allocation churn, not measured total RAM. See [method and raw results](docs/PERFORMANCE.md).
+
+## Know which version you have
+
+Open **Game version** in a card's editor, or **Settings → Version Watch** for the library overview.
+
+- Record versions manually, read the actual executable's product/file metadata, or identify an installed Steam manifest and branch.
+- Compare matching Steam builds through the third-party SteamCMD API. Results are cached for 24 hours, with a one-hour retry delay after failures.
+- Opt individual games into checks when Playdeck opens. Update badges and the **Version updates** sort bring reported newer builds forward.
+- Preserve dated last-known evidence when a source disappears. No game files are modified or updates installed.
+
+Executable version labels and Steam build IDs are different systems. Playdeck never compares them against each other; arbitrary releases need manual latest-version input. Public branch data can lag, and protected branches may be unavailable. [Methods, privacy and limitations](docs/VERSIONS.md).
+
+![Version Watch with manual demonstration values](docs/version.png)
 
 ## Install & play
 
@@ -89,7 +102,7 @@ Only games launched **through Playdeck** are tracked. Process lifetime includes 
 
 Exact executable identity and descendants help follow ordinary launcher handoffs. Very short bootstrap processes, elevated/protected games, anti-cheat and storefront reuse may require setting the actual tracking executable. Commercial-game compatibility is not universal. Launch-only and undetected sessions do not invent playtime.
 
-Library, profile, artwork and history live locally. Metadata lookup contacts Steam services/CDNs and can be disabled in settings. No telemetry, cloud account or library upload. Empty Trash removes card records; raw sessions, artwork and backups may remain. It is not secure erasure.
+Library, profile, artwork and history live locally. Metadata lookup contacts Steam services/CDNs; enabled version checks also send the game AppID to the third-party SteamCMD API. Online access can be disabled in settings. No telemetry, cloud account or library upload. Empty Trash removes card records; raw sessions, artwork and backups may remain. It is not secure erasure.
 
 ## Build it yourself
 

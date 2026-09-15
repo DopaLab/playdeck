@@ -1,5 +1,14 @@
 # Changelog
 
+## 6.1.0 — 2026-09-15
+
+- Draw static card content on lightweight surfaces, retain nearby card controls and prewarm adjacent rows during idle time.
+- Rebuild Activity with period comparisons, daily rhythm, focus coverage, a 90-day calendar, rankings and session detail. Add breathing room around the focus ring and a vector refresh button.
+- Add Version Watch: manual versions, executable metadata, bound Steam manifests, branch-specific cached remote builds, optional daily checks and update sorting.
+- Preserve last-known version evidence when an executable or manifest disappears; reject mismatched AppIDs and incomplete installs.
+- Release the initial launch process handle immediately. Direct and handoff fixture games exit cleanly; no game termination is performed. The reported commercial-game lingering process was not reproduced.
+
+
 ## 6.0.0 — 2026-09-12
 
 ### Performance

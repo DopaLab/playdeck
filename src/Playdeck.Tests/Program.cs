@@ -14,6 +14,11 @@ internal static class Program {
    Test("Accounting splits midnight and separates focus",()=>{var s=new Session();var end=new DateTimeOffset(DateTime.Today.AddSeconds(2));SessionAccounting.Accrue(s,end,4,true);SessionAccounting.Accrue(s,end.AddSeconds(2),2,false);Assert(s.Seconds==6&&s.ForegroundSeconds==4&&SessionAccounting.OnDay(s,DateTime.Today.AddDays(-1))==2&&SessionAccounting.OnDay(s,DateTime.Today)==4);});
    Test("Legacy statistics retain history",()=>{var s=new Session{Started=DateTimeOffset.Now,Seconds=90};Assert(SessionAccounting.OnDay(s,DateTime.Today)==90);});
    Test("Reused tracker PID cannot keep session alive",()=>{var data=Path.Combine(root,"pid-reuse");Store.Atomic(Path.Combine(data,"sessions","one.json"),new Session{TrackerPid=Environment.ProcessId,TrackerBornUtcTicks=1,Status="Playing",Seconds=42});Assert(Store.Sessions(data).Single().Status=="Interrupted");});
+   Test("Activity splits daily totals across reporting periods",()=>{var game=new Game();var end=DateTime.Today;var session=new Session{GameId=game.Id,Started=new DateTimeOffset(end.AddDays(-8)),Seconds=200,DailySeconds=new(){{end.ToString("yyyy-MM-dd"),50},{end.AddDays(-8).ToString("yyyy-MM-dd"),150}}};var report=ActivityReport.Build(new[]{game},new[]{session},7,end);Assert(report.Seconds==50&&report.PreviousSeconds==150&&report.Launches==0&&report.GamesPlayed==1&&report.ActiveDays==1);});
+   Test("Activity excludes removed games and preserves archives",()=>{var a=new Game{Archived=true};var b=new Game{Removed=true};var report=ActivityReport.Build(new[]{a,b},new[]{new Session{GameId=a.Id,Seconds=60},new Session{GameId=b.Id,Seconds=900}},30,DateTime.Today);Assert(report.Seconds==60&&report.Launches==1);});
+   Test("Focus coverage excludes unknown history",()=>{var game=new Game();var report=ActivityReport.Build(new[]{game},new[]{new Session{GameId=game.Id,Seconds=100},new Session{GameId=game.Id,Seconds=40,HasFocusData=true,ForegroundSeconds=30}},30,DateTime.Today);Assert(report.AllSeconds==140&&report.FocusMeasuredSeconds==40&&report.FocusSeconds==30);});
+   Test("Empty analytics are finite and stable",()=>{var report=ActivityReport.Build(Array.Empty<Game>(),Array.Empty<Session>(),30,DateTime.Today);Assert(report.Seconds==0&&report.AverageSession==0&&report.Days.Length==30&&report.Ranking.Length==0);});
+   await VersionTests.Run(Test,Assert,root,args.Contains("--network"));
    Test("Name cleanup",()=>Assert(Names.Clean("Hollow_Knight - Shortcut")=="Hollow Knight"));
    Test("Strict normalization",()=>Assert(Names.Normalize("Hollow Knight™")==Names.Normalize("Hollow Knight")));
    Test("Non-Latin names remain distinguishable",()=>Assert(Names.Normalize("游戏甲")!=Names.Normalize("游戏乙")));
@@ -78,6 +83,7 @@ internal static class Program {
   var session=Store.Sessions(data).Single();Test("Real process duration and completed status",()=>Assert(session.Status=="Completed"&&session.Seconds>=3&&session.Seconds<12));
   Test("Tracker records focus capability and daily totals",()=>Assert(session.HasFocusData&&Math.Abs(session.DailySeconds.Values.Sum()-session.Seconds)<.01&&session.ForegroundSeconds<=session.Seconds));
   Test("Tracker exits after game closes",()=>Assert(p.HasExited));
+  Test("Closed fixture game leaves no running process",()=>{var remaining=Process.GetProcessesByName(Path.GetFileNameWithoutExtension(exe));try{Assert(remaining.Length==0);}finally{foreach(var process in remaining)process.Dispose();}});
  }
  static void Test(string name,Action action){try{action();passed++;Console.WriteLine("PASS "+name);}catch(Exception e){failures++;Console.WriteLine("FAIL "+name+": "+e.Message);}}
  static void Assert(bool condition){if(!condition)throw new Exception("Assertion failed");}

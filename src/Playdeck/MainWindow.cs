@@ -26,11 +26,11 @@ public sealed partial class MainWindow:Window {
  readonly StackPanel content=new(); readonly TextBlock status=new(); readonly TextBlock pageTitle=new();
  readonly Dictionary<string,Button> navigation=[];
  readonly TextBox search=new(){Width=245,HorizontalAlignment=HorizontalAlignment.Left,ToolTip="Search your library",Margin=new Thickness(0,0,12,0)};
- readonly ComboBox sort=new(){ItemsSource=new[]{"Recently played","Most played","Most launched","Date added","Release date","Title A–Z"},SelectedIndex=0};
+ readonly ComboBox sort=new(){ItemsSource=new[]{"Recently played","Most played","Most launched","Date added","Release date","Title A–Z","Version updates"},SelectedIndex=0};
  
  List<Session> sessions=[]; string view="Library"; bool enriching, compact;  readonly string? capture;
  public MainWindow(string dataRoot,bool demoMode,string? capturePath,string? initialLaunch=null){
-  root=dataRoot;demo=demoMode;capture=capturePath;library=Store.Load(root);sessions=Store.Sessions(root);compact=library.CompactCards;sort.SelectedIndex=Math.Clamp(library.SortIndex,0,5);
+  root=dataRoot;demo=demoMode;capture=capturePath;library=Store.Load(root);sessions=Store.Sessions(root);compact=library.CompactCards;sort.SelectedIndex=Math.Clamp(library.SortIndex,0,6);
   Title="Playdeck — Your next good game";Background=Brush("#101510");Foreground=Brush("#F1F3EB");FontFamily=new FontFamily("Segoe UI Variable Text");Width=1240;Height=820;MinWidth=960;MinHeight=600;WindowStartupLocation=WindowStartupLocation.CenterScreen;
   if(demo&&library.Games.Count==0)SeedDemo();if(!demo){foreach(var game in library.Games.Where(g=>g.Removed&&!g.TrashedAt.HasValue))game.TrashedAt=DateTimeOffset.UtcNow;LibraryActions.ExpireTrash(library,DateTimeOffset.UtcNow);Save();}
   BuildShell(); Render();SizeChanged+=(_,_)=>{if(IsLoaded){resizeTimer.Stop();resizeTimer.Start();}};resizeTimer.Tick+=(_,_)=>{resizeTimer.Stop();Render();};PreviewKeyDown+=(_,e)=>{if(e.Key==System.Windows.Input.Key.Escape&&selectionMode){selectionMode=false;selected.Clear();Render();e.Handled=true;}};
@@ -39,10 +39,10 @@ public sealed partial class MainWindow:Window {
    if(initialLaunch!=null){var game=library.Games.FirstOrDefault(g=>g.Id==initialLaunch);if(game!=null){await Launch(game);return;}}
    if(capture!=null&&capture.EndsWith(".bench.json")){await Benchmark(capture);Close();return;}
    if(capture!=null){await Task.Delay(500);Render();Capture(capture);view="Pinned";Render();Capture(Path.ChangeExtension(capture,"pinned.png"));view="Activity";Render();Capture(Path.ChangeExtension(capture,"activity.png"));view="Folders & settings";Render();Capture(Path.ChangeExtension(capture,"settings.png"));view="Library";foreach(var g in library.Games)g.CoverPath="";Render();Capture(Path.ChangeExtension(capture,"fallback.png"));compact=true;Render();Capture(Path.ChangeExtension(capture,"compact.png"));Smoke();Close();return;}
-   if(!demo)await Enrich();
+   if(!demo){await Enrich();_=CheckConfiguredVersions();}
   };
   Activated+=(_,_)=>{if(demo)return;var stamp=Directory.GetLastWriteTimeUtc(Path.Combine(root,"sessions"));if(stamp==sessionStamp)return;sessionStamp=stamp;sessions=Store.Sessions(root);Render();};
-  Closed+=(_,_)=>{resizeTimer.Stop();lifetime.Cancel();metadata.Dispose();lifetime.Dispose();};
+  Closed+=(_,_)=>{resizeTimer.Stop();lifetime.Cancel();metadata.Dispose();versions.Dispose();lifetime.Dispose();};
  }
  static readonly Dictionary<string,SolidColorBrush> brushes=[];
  static SolidColorBrush Brush(string hex){if(brushes.TryGetValue(hex,out var cached))return cached;var b=new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));b.Freeze();brushes[hex]=b;return b;}
@@ -77,7 +77,7 @@ public sealed partial class MainWindow:Window {
  static void CaptureWindow(Window window,string path){Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);window.UpdateLayout();var bitmap=new RenderTargetBitmap((int)window.ActualWidth,(int)window.ActualHeight,96,96,PixelFormats.Pbgra32);bitmap.Render(window);var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bitmap));using var file=File.Create(path);encoder.Save(file);}
  void SeedDemo(){
   string[] names={"Hollow Knight","Outer Wilds","Hades","Celeste","Disco Elysium","Stardew Valley","Tunic","Dead Cells"};
-  for(int i=0;i<names.Length;i++){var g=new Game{Name=names[i],Source=i%3==0?"Steam":"Local",Favorite=i<3,PinOrder=i,MetadataAttempted=true};string cover=Path.Combine(root,"demo-art",i+".jpg");if(File.Exists(cover))g.CoverPath=cover;library.Games.Add(g);sessions.Add(new Session{GameId=g.Id,Seconds=(i+1)*2810,Started=DateTimeOffset.Now.AddDays(-i),Status="Completed"});}
+  for(int i=0;i<names.Length;i++){var g=new Game{Name=names[i],Source=i%3==0?"Steam":"Local",Favorite=i<3,PinOrder=i,MetadataAttempted=true};string cover=Path.Combine(root,"demo-art",i+".jpg");if(File.Exists(cover))g.CoverPath=cover;library.Games.Add(g);sessions.Add(new Session{GameId=g.Id,Seconds=(i+1)*2810,HasFocusData=i<6,ForegroundSeconds=i<6?(i+1)*2810*(.57+i*.06):0,Started=DateTimeOffset.Now.AddDays(-i),Status="Completed"});}
  }
  void AddGames(){var dlg=new OpenFileDialog{Title="Add executables or shortcuts",Filter="Games and shortcuts|*.exe;*.lnk;*.url",Multiselect=true};if(dlg.ShowDialog(this)==true)QueueImports(dlg.FileNames);}
  Window Dialog(string title,StackPanel body,double width=590){body.Margin=new Thickness(0,0,12,0);var window=new Window{Owner=this,Title=title,Width=width,SizeToContent=SizeToContent.Height,MaxHeight=760,WindowStartupLocation=WindowStartupLocation.CenterOwner,ResizeMode=ResizeMode.NoResize,Content=new ScrollViewer{Content=body,Margin=new Thickness(25)}};var probe=dialogProbe;if(probe!=null)window.ContentRendered+=(_,_)=>Dispatcher.BeginInvoke(()=>probe(window));return window;}

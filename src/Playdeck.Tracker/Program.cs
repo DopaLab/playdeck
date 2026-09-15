@@ -17,7 +17,8 @@ internal static class Program {
    var psi=new ProcessStartInfo(g.LaunchPath){UseShellExecute=true};
    if(Path.GetExtension(g.LaunchPath).Equals(".exe",StringComparison.OrdinalIgnoreCase))psi.Arguments=g.Arguments;
    if(Directory.Exists(g.WorkingDirectory))psi.WorkingDirectory=g.WorkingDirectory;
-   using var launched=Process.Start(psi);
+   // The tracker observes process identity; it does not need to retain the shell launch handle.
+   Process.Start(psi)?.Dispose();
    var session=new Session{GameId=g.Id,TrackerPid=Environment.ProcessId,TrackerBornUtcTicks=Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks};
    string sessionPath=Path.Combine(request.DataRoot,"sessions",session.Id+".json");
    Store.Atomic(sessionPath,session);

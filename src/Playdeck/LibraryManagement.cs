@@ -11,7 +11,7 @@ using Playdeck.Core;
 namespace Playdeck;
 public sealed partial class MainWindow {
  void AddEditorActions(Game g,StackPanel body,Window dialog){
-  var actions=new WrapPanel{Margin=new Thickness(0,12,0,10)};actions.Children.Add(Btn("Choose Steam match",()=>ChooseSteamMatch(g)));actions.Children.Add(Btn("Paste cover  ·  Ctrl+V",()=>PasteCover(g,dialog),true));
+  var actions=new WrapPanel{Margin=new Thickness(0,12,0,10)};actions.Children.Add(Btn("Game version",()=>VersionDialog(g)));actions.Children.Add(Btn("Choose Steam match",()=>ChooseSteamMatch(g)));actions.Children.Add(Btn("Paste cover  ·  Ctrl+V",()=>PasteCover(g,dialog),true));
   Button? pinButton=null;pinButton=Btn(g.Favorite?"Unpin":"Pin",()=>{LibraryActions.Pin(library,g,!g.Favorite);foreach(var box in body.Children.OfType<CheckBox>().Where(x=>x.Content is string label&&label.StartsWith("Pin to")))box.IsChecked=g.Favorite;Save();Render();pinButton!.Content=g.Favorite?"Unpin":"Pin";});actions.Children.Add(pinButton);
   if(g.Favorite){actions.Children.Add(Btn("Move pin to front",()=>{g.PinOrder=library.Games.Where(x=>x.Favorite&&x.PinOrder<int.MaxValue).Select(x=>x.PinOrder).DefaultIfEmpty(0).Min()-1;Save();Render();}));}
   actions.Children.Add(Btn("Move to Trash",()=>{TrashGames(new[]{g});dialog.Close();}));body.Children.Insert(1,actions);

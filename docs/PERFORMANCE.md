@@ -1,5 +1,13 @@
 # Performance measurements
 
+## v6.1 follow-up — 2026-09-15
+
+Same machine and fixture described below, comparing the published v6.0 build with v6.1. Raw results: [v6.0](v60.bench.json), [v6.1](v61.bench.json). Refresh median: 130.13 → 40.25 ms. Scroll P95: 23.65 → 12.30 ms. Scroll median: 1.20 → 1.00 ms. Managed allocations: 29.77 → 15.10 MiB. Both realized 25 cards and decoded zero additional warm images. Working set: 147.38 → 151.22 MiB.
+
+Static card content now uses one drawing surface. An LRU retains 72 nearby card controls, expanding if the visible viewport requires more. Idle callbacks prepare adjacent rows. The synthetic test does not fully exercise idle prewarming and does not measure GPU frame pacing.
+
+## Historical v5 → v6 measurements
+
 Measured locally on Windows x64, Intel Core i5-3470 at 3.20 GHz, on 2026-09-12. These are synthetic WPF UI-thread layout timings, not GPU frame pacing, physical input latency or universal hardware guarantees.
 
 The baseline uses v5 source with only Benchmark.cs and the benchmark capture entry point added. v6 uses the same workload. Both are Release, self-contained win-x64, ReadyToRun builds at 1240 x 820.
@@ -15,7 +23,7 @@ The baseline uses v5 source with only Benchmark.cs and the benchmark capture ent
 - Managed allocation is cumulative churn, not retained heap. Working set is a single process snapshot and includes framework/runtime resources.
 - The optimized cache records zero extra decodes because those eight images are already warm. This does not imply unique artwork is free to load.
 
-Raw measurements: [v5 baseline](baseline.bench.json), [initial optimized run](optimized.bench.json), [final build](final.bench.json). The README uses the final build. No averages across selectively chosen machines.
+Raw measurements: [v5 baseline](baseline.bench.json), [initial optimized run](optimized.bench.json), [final build](final.bench.json). These historical results predate the v6.1 README comparison. No averages across selectively chosen machines.
 
 An additional [idle/startup sample](idle.json), using eight demonstration games, reached Windows input-idle after 2.16 seconds on a warm launch. It used 0.109 CPU seconds over the next ten wall-clock seconds, with a 128 MiB process working-set snapshot. This includes framework overhead and is not a cold-start or steady-state guarantee. Closed UI uses no resources; during play the separate tracker remains until the game ends.
 

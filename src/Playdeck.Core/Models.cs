@@ -29,6 +29,7 @@ public sealed class Game {
  public bool MetadataAttempted {get;set;}
  public string MetadataStatus {get;set;} = "Local artwork";
  public string Notes {get;set;} = "";
+ public VersionRecord VersionInfo {get;set;} = new();
 }
 public sealed class Library {
  public int Version {get;set;} = 4;
