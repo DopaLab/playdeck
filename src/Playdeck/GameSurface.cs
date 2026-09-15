@@ -20,6 +20,7 @@ public sealed class GameSurface:FrameworkElement {
  sealed class VersionPeer(GameSurface owner):System.Windows.Automation.Peers.FrameworkElementAutomationPeer(owner),System.Windows.Automation.Provider.IInvokeProvider {
   protected override string GetNameCore()=>"Version details for "+owner.name+" · "+owner.badge.Text;
   protected override System.Windows.Automation.Peers.AutomationControlType GetAutomationControlTypeCore()=>System.Windows.Automation.Peers.AutomationControlType.Button;
+  protected override Rect GetBoundingRectangleCore(){if(!owner.IsVisible)return Rect.Empty;var dpi=VisualTreeHelper.GetDpi(owner);return new Rect(owner.PointToScreen(new Point(11,owner.pinned?39:11)),new Size(owner.VersionChipWidth(owner.ActualWidth)*dpi.DpiScaleX,20*dpi.DpiScaleY));}
   public override object? GetPattern(System.Windows.Automation.Peers.PatternInterface pattern)=>pattern==System.Windows.Automation.Peers.PatternInterface.Invoke?this:base.GetPattern(pattern);
   public void Invoke()=>owner.Dispatcher.BeginInvoke(()=>owner.OpenVersion?.Invoke());
  }
