@@ -18,7 +18,7 @@ public sealed class ActivityReport {
  public int Interrupted{get;init;}
  public int Unmeasured{get;init;}
  public static ActivityReport Build(IEnumerable<Game> games,IEnumerable<Session> sessions,int count,DateTime today){
-  count=Math.Clamp(count,7,90);today=today.Date;var library=games.Where(g=>!g.Removed).ToDictionary(g=>g.Id);var data=sessions.Where(s=>library.ContainsKey(s.GameId)).ToArray();var start=today.AddDays(1-count);var previous=start.AddDays(-count);
+  count=Math.Clamp(count,7,90);today=today.Date;var library=games.Where(g=>!g.Removed&&!g.IsTool).ToDictionary(g=>g.Id);var data=sessions.Where(s=>library.ContainsKey(s.GameId)).ToArray();var start=today.AddDays(1-count);var previous=start.AddDays(-count);
   var totals=new Dictionary<DateTime,double>();var byGame=new Dictionary<string,double>();
   foreach(var session in data){
    var days=session.DailySeconds.Count>0?session.DailySeconds.Select(p=>(Date:DateTime.TryParseExact(p.Key,"yyyy-MM-dd",System.Globalization.CultureInfo.InvariantCulture,System.Globalization.DateTimeStyles.None,out var date)?date:DateTime.MinValue,Seconds:p.Value)):new[]{(Date:session.Started.LocalDateTime.Date,Seconds:session.Seconds)};

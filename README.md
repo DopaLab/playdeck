@@ -9,7 +9,7 @@
 
 <h3 align="center">Your games deserve a better shelf.</h3>
 <p align="center">A personal Windows launcher with bold cover cards, instant favorites and local play history.<br>No account. No folder crawler. No always-running launcher.</p>
-<p align="center"><b><a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-Setup-6.1.0.exe">↓ Install Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-v6.1.0-win-x64.zip">Portable ZIP</a> · <a href="#your-library-in-motion">See the app</a></b></p>
+<p align="center"><b><a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-Setup-6.2.0.exe">↓ Install Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-v6.2.0-win-x64.zip">Portable ZIP</a> · <a href="#your-library-in-motion">See the app</a></b></p>
 
 ## Your library, in motion
 
@@ -49,7 +49,7 @@ The banner is AI-generated promotional art. Application images are real WPF capt
 - **No idle tracker:** a separate helper runs during a launched game, checkpoints every 30 seconds, and exits afterward. No boot service or scheduled task.
 - **Cached metadata:** completed lookups and failures are remembered; manual Steam search results are cached for one day.
 
-Same-machine synthetic test: 2,000 games, 20,000 sessions, eight preloaded covers, five refreshes and 100 scroll steps.
+Historical v6.0 → v6.1 synthetic test (see the v6.2 follow-up in the performance document): 2,000 games, 20,000 sessions, eight preloaded covers, five refreshes and 100 scroll steps.
 
 | WPF workload | v6.0 | v6.1 |
 |---|---:|---:|
@@ -63,16 +63,20 @@ Local synthetic layout measurements, **not GPU frame rates or universal guarante
 
 ## Know which version you have
 
-Open **Game version** in a card's editor, or **Settings → Version Watch** for the library overview.
+Click a card's small version chip (or press **V** on a focused card), or open **Settings → Version Watch**.
 
-- Record versions manually, read the actual executable's product/file metadata, or identify an installed Steam manifest and branch.
-- Compare matching Steam builds through the third-party SteamCMD API. Results are cached for 24 hours, with a one-hour retry delay after failures.
+**Find version files → select evidence → Use selected.** Playdeck checks nearby version files and known Steam/Epic installation records. Enter a version from the game's menu when no reliable evidence exists. Review next game helps work through unresolved cards.
+
+Small checkered chips show the version: **green** for a recent matching comparison, **yellow** for a newer version, and **grey** for uncertain or stale evidence. They do not stretch across the artwork.
+
+- Read confirmed version files on later checks, record versions manually, read executable metadata, or identify a Steam installation even before an AppID has been assigned.
+- Compare matching Steam builds through the third-party SteamCMD API. Results are cached for 24 hours, with a minimum 24-hour retry delay after failures.
 - Opt individual games into checks when Playdeck opens. Update badges and the **Version updates** sort bring reported newer builds forward.
 - Preserve dated last-known evidence when a source disappears. No game files are modified or updates installed.
 
 Executable version labels and Steam build IDs are different systems. Playdeck never compares them against each other; arbitrary releases need manual latest-version input. Public branch data can lag, and protected branches may be unavailable. [Methods, privacy and limitations](docs/VERSIONS.md).
 
-![Version Watch with manual demonstration values](docs/version.png)
+![Guided version review with demonstration evidence](docs/version-guide.png)
 
 ## Install & play
 
@@ -95,8 +99,11 @@ Uninstall through **Windows Settings → Apps**. Data in `%LOCALAPPDATA%\Playdec
 | Start a fresh library | Settings; old cards move to recoverable trash |
 | Export history | Settings → CSV, including focus time and session status |
 | Customize profile | Click the player badge |
+| Gaming utility / mod manager | Settings → Manage tools, or Mark as tool in its card editor |
 
 ### Tracking & privacy
+
+**Tool mode** opens utilities independently, keeps Playdeck open and creates no play sessions. Existing tool history is retained but excluded from game analytics. Square opaque game icons receive rounded corners; transparent or shaped icons keep their outlines.
 
 Only games launched **through Playdeck** are tracked. Process lifetime includes pauses; foreground time means the game owned the foreground window, not proof of active input. Sampling is every two seconds, so durations are approximate. Sleep gaps of ten seconds or more are excluded. Interrupted runs retain the last checkpoint, potentially losing about 30 seconds. Older sessions keep their original totals and use their start date in daily charts.
 

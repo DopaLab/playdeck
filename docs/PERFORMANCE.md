@@ -1,5 +1,12 @@
 # Performance measurements
 
+## v6.2 with compact version chips — 2026-09-15
+
+Three same-machine runs per build, using the unchanged fixture below. [All raw samples](v62-comparison.json). Median of the three reported values: v6.1 refresh 48.44 ms, scroll P95 10.86 ms, allocations 11.21 MiB; v6.2 refresh 52.82 ms, scroll P95 13.20 ms, allocations 12.70 MiB. Both retain 25 realized cards and zero repeated warm image decodes. These samples do **not** establish that v6.2 is faster than v6.1; the added visible version UI has a small measured cost. Ordinary v6.2 scroll medians were 0.46–0.50 ms. Hardware load and runtime conditions vary.
+
+An initial implementation with separate invisible chip controls measured 59–93 ms refresh and 14.9–17.4 ms scroll P95. Replacing those controls with hit testing on the existing drawing surface, caching badge text and sharing frozen vectors reduced that work without removing the chip. No GPU FPS or zero-impact-on-games claim is made. Version discovery is bounded and off the UI thread; online work is cached, serialized and canceled when the launcher closes.
+
+
 ## v6.1 follow-up — 2026-09-15
 
 Same machine and fixture described below, comparing the published v6.0 build with v6.1. Raw results: [v6.0](v60.bench.json), [v6.1](v61.bench.json). Refresh median: 130.13 → 40.25 ms. Scroll P95: 23.65 → 12.30 ms. Scroll median: 1.20 → 1.00 ms. Managed allocations: 29.77 → 15.10 MiB. Both realized 25 cards and decoded zero additional warm images. Working set: 147.38 → 151.22 MiB.

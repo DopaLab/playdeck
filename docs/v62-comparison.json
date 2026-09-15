@@ -1,0 +1,84 @@
+{
+  "6.1": [
+    {
+      "Games": 2000,
+      "Sessions": 20000,
+      "ScrollSteps": 100,
+      "RenderMedianMs": 47.2867,
+      "ScrollMedianMs": 0.5033,
+      "ScrollP95Ms": 10.8625,
+      "DecodedImages": 0,
+      "AllocatedMB": 11.21240234375,
+      "MaxRealizedCards": 25,
+      "ElapsedSeconds": 1.1641442,
+      "WorkingSetMB": 145.2265625
+    },
+    {
+      "Games": 2000,
+      "Sessions": 20000,
+      "ScrollSteps": 100,
+      "RenderMedianMs": 50.4372,
+      "ScrollMedianMs": 0.5141,
+      "ScrollP95Ms": 12.7706,
+      "DecodedImages": 0,
+      "AllocatedMB": 11.206008911132812,
+      "MaxRealizedCards": 25,
+      "ElapsedSeconds": 0.7701298,
+      "WorkingSetMB": 143.5234375
+    },
+    {
+      "Games": 2000,
+      "Sessions": 20000,
+      "ScrollSteps": 100,
+      "RenderMedianMs": 48.44,
+      "ScrollMedianMs": 0.411,
+      "ScrollP95Ms": 9.3637,
+      "DecodedImages": 0,
+      "AllocatedMB": 11.198638916015625,
+      "MaxRealizedCards": 25,
+      "ElapsedSeconds": 0.6163271,
+      "WorkingSetMB": 142.27734375
+    }
+  ],
+  "6.2": [
+    {
+      "Games": 2000,
+      "Sessions": 20000,
+      "ScrollSteps": 100,
+      "RenderMedianMs": 45.721,
+      "ScrollMedianMs": 0.4971,
+      "ScrollP95Ms": 13.2016,
+      "DecodedImages": 0,
+      "AllocatedMB": 12.734664916992188,
+      "MaxRealizedCards": 25,
+      "ElapsedSeconds": 0.7853629,
+      "WorkingSetMB": 149.3359375
+    },
+    {
+      "Games": 2000,
+      "Sessions": 20000,
+      "ScrollSteps": 100,
+      "RenderMedianMs": 52.8202,
+      "ScrollMedianMs": 0.4572,
+      "ScrollP95Ms": 13.0434,
+      "DecodedImages": 0,
+      "AllocatedMB": 12.697097778320312,
+      "MaxRealizedCards": 25,
+      "ElapsedSeconds": 0.8027062,
+      "WorkingSetMB": 148.64453125
+    },
+    {
+      "Games": 2000,
+      "Sessions": 20000,
+      "ScrollSteps": 100,
+      "RenderMedianMs": 57.8141,
+      "ScrollMedianMs": 0.4733,
+      "ScrollP95Ms": 15.3168,
+      "DecodedImages": 0,
+      "AllocatedMB": 12.681930541992188,
+      "MaxRealizedCards": 25,
+      "ElapsedSeconds": 0.9129179,
+      "WorkingSetMB": 148.421875
+    }
+  ]
+}

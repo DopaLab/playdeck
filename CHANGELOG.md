@@ -1,5 +1,15 @@
 # Changelog
 
+## 6.2.0 — 2026-09-15
+
+- Guided version discovery: bounded nearby version files, known Steam installations without a preassigned AppID, and Epic installation records. Confirm evidence, enter versions manually or review unresolved games in sequence.
+- Tiny content-sized checkered version chips with centered upright text: green current comparison, yellow newer version, neutral unknown/stale. Click the chip or press V for details.
+- Cache successful and failed API checks for at least 24 hours; honor longer server retry delays. Skip pointless build requests for executable-only versions. Automatic checks stop when the launcher loses focus or detects a tracked game.
+- Tool mode in Settings and card editors: launch independently, keep the launcher open and skip play tracking. Preserve existing history while excluding tools from game analytics.
+- Round only opaque square game icons, retaining transparent silhouettes.
+- Reuse frozen drawing resources and badge text; avoid separate invisible controls and repeated layout work for version-chip interaction.
+
+
 ## 6.1.0 — 2026-09-15
 
 - Draw static card content on lightweight surfaces, retain nearby card controls and prewarm adjacent rows during idle time.

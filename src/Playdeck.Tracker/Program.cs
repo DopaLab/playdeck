@@ -13,6 +13,7 @@ internal static class Program {
    if(!owned){Store.Atomic(request.ReplyPath,new {ok=false,error="This game is already being tracked."});return 3;}
    var g=request.Game;
    if(!File.Exists(g.LaunchPath))throw new FileNotFoundException("The launch file is missing. Edit the game or mark it archived.");
+   if(g.IsTool){int toolPid=ToolLaunch.Start(g);Store.Atomic(request.ReplyPath,new{ok=true,toolPid});try{File.Delete(args[0]);}catch(IOException){}return 0;}
    var before=Snapshot();
    var psi=new ProcessStartInfo(g.LaunchPath){UseShellExecute=true};
    if(Path.GetExtension(g.LaunchPath).Equals(".exe",StringComparison.OrdinalIgnoreCase))psi.Arguments=g.Arguments;

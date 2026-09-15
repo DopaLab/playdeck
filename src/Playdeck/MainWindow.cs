@@ -19,7 +19,7 @@ using Button=System.Windows.Controls.Button;
 
 namespace Playdeck;
 public sealed partial class MainWindow:Window {
- Action<Window>? dialogProbe; Action<Game>? editingProbe; Action<Game>? launchProbe;
+ Action<Window>? dialogProbe; Action<Game>? editingProbe; Action<Game>? launchProbe; Action<Game>? toolStartProbe;
  readonly string root; readonly bool demo; readonly Library library; readonly Metadata metadata=new();
  readonly CancellationTokenSource lifetime=new();
  readonly DispatcherTimer resizeTimer=new(){Interval=TimeSpan.FromMilliseconds(120)};
@@ -52,7 +52,7 @@ public sealed partial class MainWindow:Window {
  static TextBlock Text(string s,double size=14,string color="#F1F3EB",FontWeight? weight=null)=>new(){Text=s,FontSize=size,FontFamily=size>=20||weight==FontWeights.Black?DisplayFont:BodyFont,Foreground=Brush(color),FontWeight=size>=20||weight==FontWeights.Black?FontWeights.Normal:weight??FontWeights.Normal,TextWrapping=TextWrapping.Wrap};
  static Button Btn(string text,Action action,bool accent=false){var b=new Button{Content=text,Margin=new Thickness(0,0,10,10)};if(accent){b.Background=Brush("#E1FF46");b.Foreground=Brush("#171516");}b.Click+=(_,_)=>action();return b;}
  List<Session>? indexedSessions;int indexedCount=-1;ILookup<string,Session>? historyIndex;
- IEnumerable<Session> History(Game g){if(!ReferenceEquals(indexedSessions,sessions)||indexedCount!=sessions.Count){historyIndex=sessions.ToLookup(s=>s.GameId);indexedSessions=sessions;indexedCount=sessions.Count;}return historyIndex![g.Id];}
+ IEnumerable<Session> History(Game g){if(g.IsTool)return Enumerable.Empty<Session>();if(!ReferenceEquals(indexedSessions,sessions)||indexedCount!=sessions.Count){historyIndex=sessions.ToLookup(s=>s.GameId);indexedSessions=sessions;indexedCount=sessions.Count;}return historyIndex![g.Id];}
  static string Hours(double seconds)=>seconds>=3600?$"{seconds/3600:0.#} h":$"{Math.Floor(seconds/60):0} min";
  static long imageDecodes;
  // Bounded decoded-image LRU: file changes invalidate entries, and scrolling reuses frozen bitmaps.
@@ -95,8 +95,9 @@ public sealed partial class MainWindow:Window {
   }finally{enriching=false;if(!lifetime.IsCancellationRequested)Render();}
  }
  async Task Launch(Game g){
-  if(demo){MessageBox.Show(this,"This is an isolated visual demo. Add your own game to the regular library to launch it.","Demo library");return;}
+  if(demo&&toolStartProbe==null){MessageBox.Show(this,"This is an isolated visual demo. Add your own game to the regular library to launch it.","Demo library");return;}
   if(!File.Exists(g.LaunchPath)){MessageBox.Show(this,"The launch file is missing. Choose a new launch file in Edit, or archive the game.","Game unavailable");return;}
+  if(g.IsTool){try{if(toolStartProbe!=null)toolStartProbe(g);else ToolLaunch.Start(g);status.Text="Opened "+g.Name+" · tool mode, no play tracking.";}catch(Exception ex){MessageBox.Show(this,ex.Message,"Could not open tool");}return;}
   if(string.IsNullOrWhiteSpace(g.TrackPath)){
    if(MessageBox.Show(this,"This shortcut does not expose the game's executable. The launch will be recorded, but playtime will not be estimated.\n\nFor playtime, choose the game's executable in Edit → Tracking executable. Launch now?","Launch tracking",MessageBoxButton.YesNo)!=MessageBoxResult.Yes)return;
   }
@@ -124,7 +125,8 @@ public sealed partial class MainWindow:Window {
   var tracking=Field("TRACKING EXECUTABLE (exact game .exe, not Steam / Epic)",g.TrackPath);
   body.Children.Add(Btn("Choose tracking executable",()=>{var f=new OpenFileDialog{Filter="Executable|*.exe"};if(f.ShowDialog()==true)tracking.Text=f.FileName;}));
   var release=Field("RELEASE DATE (YYYY-MM-DD, blank if unknown)",g.ReleaseDate?.ToString("yyyy-MM-dd")??"");var notes=Field("NOTES",g.Notes);
-  var archived=new CheckBox{Content="Uninstalled / archived — keep all history",IsChecked=g.Archived};body.Children.Add(archived);
+  var toolMode=new CheckBox{Content="Mark as tool · keep Playdeck open, no play tracking",IsChecked=g.IsTool};body.Children.Add(toolMode);
+   var archived=new CheckBox{Content="Uninstalled / archived — keep all history",IsChecked=g.Archived};body.Children.Add(archived);
   var favorite=new CheckBox{Content="Pin to your quick-launch shelf",IsChecked=g.Favorite};body.Children.Add(favorite);
   var dialog=Dialog("Edit · "+g.Name,body);var row=new WrapPanel{Margin=new Thickness(0,12,0,0)};
   row.Children.Add(Btn("Save changes",()=>{
@@ -132,7 +134,7 @@ public sealed partial class MainWindow:Window {
    if((!File.Exists(path.Text)&&path.Text!=g.LaunchPath)||!new[]{".exe",".lnk",".url"}.Contains(Path.GetExtension(path.Text).ToLowerInvariant())){MessageBox.Show(dialog,"Choose an existing executable or shortcut.");return;}
    if(tracking.Text.Length>0&&((!File.Exists(tracking.Text)&&tracking.Text!=g.TrackPath)||!Path.GetExtension(tracking.Text).Equals(".exe",StringComparison.OrdinalIgnoreCase))){MessageBox.Show(dialog,"Choose an existing tracking executable, or leave it blank.");return;}
    DateTime? date=null;if(release.Text.Length>0){if(!DateTime.TryParseExact(release.Text,"yyyy-MM-dd",System.Globalization.CultureInfo.InvariantCulture,System.Globalization.DateTimeStyles.None,out var parsed)){MessageBox.Show(dialog,"Use YYYY-MM-DD for the release date.");return;}date=parsed;}
-   g.Name=name.Text.Trim();g.LaunchPath=path.Text;g.Arguments=args.Text;g.TrackPath=tracking.Text;g.WorkingDirectory=working.Text;g.ReleaseDate=date;g.Notes=notes.Text;g.Archived=archived.IsChecked==true;if(g.Favorite!=(favorite.IsChecked==true))LibraryActions.Pin(library,g,favorite.IsChecked==true);Save();dialog.Close();Render();
+   g.IsTool=toolMode.IsChecked==true;g.Name=name.Text.Trim();g.LaunchPath=path.Text;g.Arguments=args.Text;g.TrackPath=tracking.Text;g.WorkingDirectory=working.Text;g.ReleaseDate=date;g.Notes=notes.Text;g.Archived=archived.IsChecked==true;if(g.Favorite!=(favorite.IsChecked==true))LibraryActions.Pin(library,g,favorite.IsChecked==true);Save();dialog.Close();Render();
   },true));
   row.Children.Add(Btn("Set cover",()=>{var f=new OpenFileDialog{Filter="Images|*.jpg;*.jpeg;*.png;*.webp;*.bmp"};if(f.ShowDialog()==true){if(LoadImage(f.FileName,400)==null){MessageBox.Show(dialog,"This image format could not be read. Use PNG or JPEG.");return;}string dest=Path.Combine(root,"artwork",g.Id+Path.GetExtension(f.FileName));Directory.CreateDirectory(Path.GetDirectoryName(dest)!);if(!string.Equals(dest,f.FileName,StringComparison.OrdinalIgnoreCase))File.Copy(f.FileName,dest,true);g.CoverPath=dest;g.MetadataAttempted=true;g.MetadataStatus="Custom artwork";Save();Render();}}));
   row.Children.Add(Btn("Retry online match",()=>{g.MetadataAttempted=false;Save();dialog.Close();_=Enrich();}));body.Children.Add(row);

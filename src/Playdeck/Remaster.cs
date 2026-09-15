@@ -13,6 +13,7 @@ public sealed partial class MainWindow {
  void Settings(){
  IntegrationSettings();
  var versionPanel=Section("VERSION WATCH","Track manual versions, executable metadata and Steam builds. Online evidence is cached; checks never update a game.");versionPanel.Children.Add(Btn("Open version watch",VersionHub,true));
+ var tools=Section("GAMES & TOOLS","Tools open without play tracking and leave Playdeck open. You can also mark a tool in its card editor.");tools.Children.Add(Btn("Manage tools",ManageTools));
  var profile=Section("PLAYER PROFILE","Customize the player card in the top-left corner.");profile.Children.Add(Btn("Edit profile",EditProfile));
  var art=Section("Artwork on autopilot","Titles and Steam IDs are used for online matching. Results are cached locally; unmatched games show their icon on your default cover. Paste your own image in the card editor.");var online=new CheckBox{Content="Fetch titles, release dates and artwork",IsChecked=library.Online};online.Click+=(_,_)=>{library.Online=online.IsChecked==true;Save();if(library.Online)_=Enrich();};art.Children.Add(online);
  var history=Section("Keep the story","Archived games retain cached icons, covers and activity even when their installation disappears. The tracking helper runs only during games launched through Playdeck.");history.Children.Add(Btn("Export sessions CSV",Export));

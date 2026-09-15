@@ -7,7 +7,8 @@ using System.Windows.Media;
 using Playdeck.Core;
 namespace Playdeck;
 static class ChartInk {
- public static SolidColorBrush Brush(string hex){var b=new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));b.Freeze();return b;}
+ static readonly System.Collections.Generic.Dictionary<string,SolidColorBrush> colors=[];
+ public static SolidColorBrush Brush(string hex){if(colors.TryGetValue(hex,out var existing))return existing;var b=new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));b.Freeze();colors[hex]=b;return b;}
  public static readonly Typeface Body=new(new FontFamily("Segoe UI"),FontStyles.Normal,FontWeights.Normal,FontStretches.Normal);
  public static readonly Typeface Display=new(new FontFamily(new Uri("pack://application:,,,/"),"./Assets/Fonts/#Lilita One"),FontStyles.Normal,FontWeights.Normal,FontStretches.Normal);
  public static void Text(DrawingContext dc,string value,Point point,double size,string color,double dpi,bool display=false){dc.DrawText(new FormattedText(value,CultureInfo.CurrentCulture,FlowDirection.LeftToRight,display?Display:Body,size,Brush(color),dpi),point);}

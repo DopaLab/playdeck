@@ -7,6 +7,8 @@ using System.Windows.Media.Imaging;
 using Playdeck.Core;
 namespace Playdeck;
 public sealed partial class MainWindow {
+ static readonly DrawingImage EditorDots=CreateEditorDots();
+ static DrawingImage CreateEditorDots(){var drawing=new DrawingGroup();using(var dc=drawing.Open()){for(int i=0;i<3;i++)dc.DrawEllipse(Brushes.White,null,new Point(2+i*7,2),1.5,1.5);}drawing.Freeze();var image=new DrawingImage(drawing);image.Freeze();return image;}
  static BitmapImage Asset(string name,int decode){var image=new BitmapImage();image.BeginInit();image.UriSource=new Uri("pack://application:,,,/Assets/"+name);image.DecodePixelWidth=decode;image.CacheOption=BitmapCacheOption.OnLoad;image.EndInit();image.Freeze();return image;}
  readonly BitmapImage city=Asset("fallback.png",480);
  readonly BitmapImage brandIcon=Asset("icon.png",96);
@@ -25,21 +27,23 @@ public sealed partial class MainWindow {
  }
  double CardHeight(double width)=>Math.Min(CardPanel.HeightFor(width),Math.Max(247,Height-(ActualWidth<1120?360:230)));
  FrameworkElement Card(Game g,double? forcedWidth=null){
-  double width=forcedWidth??(compact?176:218);int seed=Convert.ToInt32(Store.Key(g.Name)[..4],16);double height=CardHeight(width);double artHeight=height-77;
+  double width=forcedWidth??(compact?176:218);double height=CardHeight(width);double artHeight=height-77;
   var card=new Border{Width=width,Height=height,CornerRadius=new CornerRadius(18),BorderBrush=Brush("#080908"),BorderThickness=new Thickness(3),Background=Brush("#303033"),Cursor=System.Windows.Input.Cursors.Hand,Focusable=true,AllowDrop=view=="Pinned"};
   var all=new Grid();card.Child=all;var cover=LoadImage(g.CoverPath,350);var localIcon=LoadImage(CachedIcon(g),40);
-  var surface=new GameSurface(g.Name,$"{Hours(History(g).Sum(s=>s.Seconds))}  /  {History(g).Count()} launches",cover??city,cover==null?LoadImage(CachedIcon(g),128)??brandIcon:null,localIcon,g.Favorite,compact,g.VersionInfo.NeedsUpdate);all.Children.Add(surface);
+  var surface=new GameSurface(g.Name,g.IsTool?"TOOL  /  Not tracked":$"{Hours(History(g).Sum(s=>s.Seconds))}  /  {History(g).Count()} launches",cover??city,cover==null?LoadImage(CachedIcon(g),128)??brandIcon:null,localIcon,g.Favorite,compact,g.VersionInfo);all.Children.Add(surface);
+  surface.OpenVersion=()=>VersionDialog(g);
+
   if(cover==null){var art=new Grid{Height=artHeight,VerticalAlignment=VerticalAlignment.Top};var match=Btn("Find cover",()=>ChooseSteamMatch(g));match.FontSize=13;match.MinHeight=28;match.Height=28;match.Padding=new Thickness(10,2,10,2);match.Margin=new Thickness(10,0,0,10);match.HorizontalAlignment=HorizontalAlignment.Left;match.VerticalAlignment=VerticalAlignment.Bottom;art.Children.Add(match);all.Children.Add(art);}
   if(selected.Contains(g.Id))card.BorderBrush=Brush("#FF765E");
-  var edit=Btn("",()=>Edit(g));var dots=new StackPanel{Orientation=Orientation.Horizontal,HorizontalAlignment=HorizontalAlignment.Center,VerticalAlignment=VerticalAlignment.Center};for(int i=0;i<3;i++)dots.Children.Add(new System.Windows.Shapes.Ellipse{Width=3,Height=3,Fill=Brush("#FFFFFF"),Margin=new Thickness(2,0,2,0)});edit.Content=dots;edit.MinHeight=28;edit.Width=28;edit.Height=28;edit.Padding=new Thickness(0);edit.FontSize=19;edit.Background=Brush("#E5151712");edit.Margin=new Thickness(0,10,10,0);edit.HorizontalAlignment=HorizontalAlignment.Right;edit.VerticalAlignment=VerticalAlignment.Top;edit.ToolTip="Edit game";all.Children.Add(edit);
+  var edit=Btn("",()=>Edit(g));var dots=new Image{Source=EditorDots,Width=17,Height=4,HorizontalAlignment=HorizontalAlignment.Center,VerticalAlignment=VerticalAlignment.Center};edit.Content=dots;edit.MinHeight=28;edit.Width=28;edit.Height=28;edit.Padding=new Thickness(0);edit.FontSize=19;edit.Background=Brush("#E5151712");edit.Margin=new Thickness(0,10,10,0);edit.HorizontalAlignment=HorizontalAlignment.Right;edit.VerticalAlignment=VerticalAlignment.Top;edit.ToolTip="Edit game";all.Children.Add(edit);
   card.GotKeyboardFocus+=(_,_)=>card.BorderBrush=Brush("#F0EDE5");card.LostKeyboardFocus+=(_,_)=>card.BorderBrush=Brush("#080908");card.MouseEnter+=(_,_)=>{card.BorderBrush=Brush("#F0EDE5");surface.ShowPlay=true;};card.MouseLeave+=(_,_)=>{card.BorderBrush=Brush(selected.Contains(g.Id)?"#FF765E":"#080908");surface.ShowPlay=false;};
-  Point? origin=null;bool dragged=false;
-  card.PreviewMouseLeftButtonDown+=(_,e)=>{if(InsideButton(e.OriginalSource as DependencyObject))return;origin=e.GetPosition(card);dragged=false;};
-  card.PreviewMouseMove+=(_,e)=>{if(selectionMode||view!="Pinned"||origin==null||e.LeftButton!=System.Windows.Input.MouseButtonState.Pressed)return;var point=e.GetPosition(card);if(Math.Abs(point.X-origin.Value.X)>SystemParameters.MinimumHorizontalDragDistance||Math.Abs(point.Y-origin.Value.Y)>SystemParameters.MinimumVerticalDragDistance){dragged=true;origin=null;DragDrop.DoDragDrop(card,new DataObject("Playdeck.Pin",g.Id),DragDropEffects.Move);}};
-  card.MouseLeftButtonUp+=(_,e)=>{if(dragged||origin==null||InsideButton(e.OriginalSource as DependencyObject)){origin=null;return;}origin=null;e.Handled=true;ActivateCard(g);};
-  card.KeyDown+=(_,e)=>{if(InsideButton(e.OriginalSource as DependencyObject))return;if(e.Key==System.Windows.Input.Key.Delete){e.Handled=true;TrashGames(new[]{g});return;}if(e.Key==System.Windows.Input.Key.Enter||e.Key==System.Windows.Input.Key.Space){e.Handled=true;ActivateCard(g);}};
+  Point? origin=null;bool dragged=false,versionPressed=false;
+  card.PreviewMouseLeftButtonDown+=(_,e)=>{if(InsideButton(e.OriginalSource as DependencyObject))return;origin=e.GetPosition(card);dragged=false;versionPressed=!selectionMode&&!System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Delete)&&surface.IsVersionHit(e.GetPosition(surface));};
+  card.PreviewMouseMove+=(_,e)=>{if(versionPressed||selectionMode||view!="Pinned"||origin==null||e.LeftButton!=System.Windows.Input.MouseButtonState.Pressed)return;var point=e.GetPosition(card);if(Math.Abs(point.X-origin.Value.X)>SystemParameters.MinimumHorizontalDragDistance||Math.Abs(point.Y-origin.Value.Y)>SystemParameters.MinimumVerticalDragDistance){dragged=true;origin=null;DragDrop.DoDragDrop(card,new DataObject("Playdeck.Pin",g.Id),DragDropEffects.Move);}};
+  card.MouseLeftButtonUp+=(_,e)=>{if(dragged||origin==null||InsideButton(e.OriginalSource as DependencyObject)){origin=null;return;}origin=null;e.Handled=true;if(versionPressed){versionPressed=false;if(surface.IsVersionHit(e.GetPosition(surface)))VersionDialog(g);return;}ActivateCard(g);};
+  card.KeyDown+=(_,e)=>{if(InsideButton(e.OriginalSource as DependencyObject))return;if(e.Key==System.Windows.Input.Key.V){e.Handled=true;VersionDialog(g);return;}if(e.Key==System.Windows.Input.Key.Delete){e.Handled=true;TrashGames(new[]{g});return;}if(e.Key==System.Windows.Input.Key.Enter||e.Key==System.Windows.Input.Key.Space){e.Handled=true;ActivateCard(g);}};
   card.DragLeave+=(_,_)=>card.BorderBrush=Brush("#080908");card.DragOver+=(_,e)=>{card.BorderBrush=Brush("#F0EDE5");e.Effects=e.Data.GetDataPresent("Playdeck.Pin")?DragDropEffects.Move:DragDropEffects.None;e.Handled=true;};card.Drop+=(_,e)=>{if(e.Data.GetData("Playdeck.Pin") is string id){LibraryActions.MovePin(library,id,g.Id,e.GetPosition(card).Y>card.ActualHeight/2);Save();Render();}e.Handled=true;};
-  card.ToolTip=$"{g.Name} · Click to {(g.Archived?"restore":"play")}\n{g.MetadataStatus}";System.Windows.Automation.AutomationProperties.SetName(card,"Play "+g.Name);return card;
+  card.ToolTip=$"{g.Name} · Click to {(g.Archived?"restore":"play")}\n{g.MetadataStatus}\n{g.VersionInfo.Summary}\nClick the version chip or press V for version details.";System.Windows.Automation.AutomationProperties.SetName(card,"Play "+g.Name);return card;
  }
  static bool InsideButton(DependencyObject? source){while(source!=null){if(source is Button)return true;source=source is Visual?VisualTreeHelper.GetParent(source):LogicalTreeHelper.GetParent(source);}return false;}
  void ActivateCard(Game g){if(System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Delete)){TrashGames(new[]{g});return;}if(selectionMode){if(!selected.Add(g.Id))selected.Remove(g.Id);Render();return;}if(launchProbe!=null){launchProbe(g);return;}if(g.Archived){g.Archived=false;Save();Render();}else _=Launch(g);}

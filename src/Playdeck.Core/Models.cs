@@ -20,6 +20,7 @@ public sealed class Game {
  public DateTimeOffset Added {get;set;} = DateTimeOffset.UtcNow;
  public DateTime? ReleaseDate {get;set;}
  public bool Archived {get;set;}
+ public bool IsTool {get;set;}
  public bool Favorite {get;set;}
  public int PinOrder {get;set;} = int.MaxValue;
  public bool Removed {get;set;}
