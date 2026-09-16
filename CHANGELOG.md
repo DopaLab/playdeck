@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.3.0 — 2026-09-16
+
+- Rebuild local-game comparison around independent installed and published versions. Manual/file versions reach publisher news without any Steam installation or BuildID; support official GitHub releases as an alternate source.
+- Show local and published versions side by side, with edition confirmation, release notes, source dates and actionable missing-evidence explanations. Source selection leaves artwork and titles alone.
+- Cache successes, empty responses and failures for at least 24 hours. Retain offline release evidence; keep known updates yellow while stale matches become neutral. Reject incompatible numbering, previews and newer unnumbered update ambiguity.
+- Include manual entries in daily checks, resume on focus return, persist daily preferences immediately, and report comparison counts instead of a generic completion message.
+- Preserve compact version chips, card rendering, launch tracking, tool mode and the established visual style.
+
 ## 6.2.0 — 2026-09-15
 
 - Guided version discovery: bounded nearby version files, known Steam installations without a preassigned AppID, and Epic installation records. Confirm evidence, enter versions manually or review unresolved games in sequence.

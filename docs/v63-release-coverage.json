@@ -1,0 +1,8 @@
+{
+  "ActiveGames": 65,
+  "NumberedReleaseFound": 43,
+  "InstalledEvidenceFound": 54,
+  "NumericLabels": 18,
+  "ProviderErrors": 0,
+  "Note": "Read-only real-library audit. Source and installed-version confirmation are still required; counts are evidence availability, not verified comparisons."
+}

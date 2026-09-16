@@ -23,6 +23,7 @@ public sealed partial class MainWindow:Window {
  readonly string root; readonly bool demo; readonly Library library; readonly Metadata metadata=new();
  readonly CancellationTokenSource lifetime=new();
  readonly DispatcherTimer resizeTimer=new(){Interval=TimeSpan.FromMilliseconds(120)};
+ readonly DispatcherTimer versionTimer=new(){Interval=TimeSpan.FromMinutes(5)};
  readonly StackPanel content=new(); readonly TextBlock status=new(); readonly TextBlock pageTitle=new();
  readonly Dictionary<string,Button> navigation=[];
  readonly TextBox search=new(){Width=245,HorizontalAlignment=HorizontalAlignment.Left,ToolTip="Search your library",Margin=new Thickness(0,0,12,0)};
@@ -41,8 +42,9 @@ public sealed partial class MainWindow:Window {
    if(capture!=null){await Task.Delay(500);Render();Capture(capture);view="Pinned";Render();Capture(Path.ChangeExtension(capture,"pinned.png"));view="Activity";Render();Capture(Path.ChangeExtension(capture,"activity.png"));view="Folders & settings";Render();Capture(Path.ChangeExtension(capture,"settings.png"));view="Library";foreach(var g in library.Games)g.CoverPath="";Render();Capture(Path.ChangeExtension(capture,"fallback.png"));compact=true;Render();Capture(Path.ChangeExtension(capture,"compact.png"));Smoke();Close();return;}
    if(!demo){await Enrich();_=CheckConfiguredVersions();}
   };
-  Activated+=(_,_)=>{if(demo)return;var stamp=Directory.GetLastWriteTimeUtc(Path.Combine(root,"sessions"));if(stamp==sessionStamp)return;sessionStamp=stamp;sessions=Store.Sessions(root);Render();};
-  Closed+=(_,_)=>{resizeTimer.Stop();lifetime.Cancel();metadata.Dispose();versions.Dispose();lifetime.Dispose();};
+  Activated+=(_,_)=>{if(demo)return;_=CheckConfiguredVersions();var stamp=Directory.GetLastWriteTimeUtc(Path.Combine(root,"sessions"));if(stamp==sessionStamp)return;sessionStamp=stamp;sessions=Store.Sessions(root);Render();};
+  versionTimer.Tick+=(_,_)=>{if(IsActive&&IsEnabled)_=CheckConfiguredVersions();};if(!demo)versionTimer.Start();
+  Closed+=(_,_)=>{versionTimer.Stop();resizeTimer.Stop();lifetime.Cancel();metadata.Dispose();versions.Dispose();lifetime.Dispose();};
  }
  static readonly Dictionary<string,SolidColorBrush> brushes=[];
  static SolidColorBrush Brush(string hex){if(brushes.TryGetValue(hex,out var cached))return cached;var b=new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));b.Freeze();brushes[hex]=b;return b;}

@@ -29,24 +29,24 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           New-Item -ItemType Directory release-out | Out-Null
-          Copy-Item ../Playdeck-Setup-6.2.0.exe release-out/
-          Compress-Archive -Path Portable/* -DestinationPath release-out/Playdeck-v6.2.0-win-x64.zip
-          Expand-Archive release-out/Playdeck-v6.2.0-win-x64.zip "$env:RUNNER_TEMP/portable-check"
+          Copy-Item ../Playdeck-Setup-6.3.0.exe release-out/
+          Compress-Archive -Path Portable/* -DestinationPath release-out/Playdeck-v6.3.0-win-x64.zip
+          Expand-Archive release-out/Playdeck-v6.3.0-win-x64.zip "$env:RUNNER_TEMP/portable-check"
           $capture = "$env:RUNNER_TEMP/portable-check.png"
           $data = "$env:RUNNER_TEMP/playdeck-fixture"
           $p = Start-Process "$env:RUNNER_TEMP/portable-check/Playdeck.exe" -ArgumentList @('--demo','--data',"`"$data`"",'--capture',"`"$capture`"") -PassThru -WindowStyle Hidden
           if (!$p.WaitForExit(60000)) { throw 'Packaged UI check timed out' }
-          if ((Get-Content "$env:RUNNER_TEMP/portable-check.smoke.txt").Count -ne 53) { throw 'Packaged UI checks failed' }
+          if ((Get-Content "$env:RUNNER_TEMP/portable-check.smoke.txt").Count -ne 55) { throw 'Packaged UI checks failed' }
           $app = "$env:RUNNER_TEMP/installed-check"
-          $p = Start-Process ../Playdeck-Setup-6.2.0.exe -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=`"$app`"") -PassThru -WindowStyle Hidden
+          $p = Start-Process ../Playdeck-Setup-6.3.0.exe -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=`"$app`"") -PassThru -WindowStyle Hidden
           if (!$p.WaitForExit(60000) -or $p.ExitCode -ne 0) { throw 'Installer failed' }
           $capture = "$env:RUNNER_TEMP/installed-check.png"
           $p = Start-Process "$app/Playdeck.exe" -ArgumentList @('--demo','--data',"`"$data`"",'--capture',"`"$capture`"") -PassThru -WindowStyle Hidden
           if (!$p.WaitForExit(60000)) { throw 'Installed UI check timed out' }
-          if ((Get-Content "$env:RUNNER_TEMP/installed-check.smoke.txt").Count -ne 53) { throw 'Installed UI checks failed' }
+          if ((Get-Content "$env:RUNNER_TEMP/installed-check.smoke.txt").Count -ne 55) { throw 'Installed UI checks failed' }
           $p = Start-Process "$app/unins000.exe" -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -PassThru -WindowStyle Hidden
           if (!$p.WaitForExit(60000) -or (Test-Path "$app/Playdeck.exe")) { throw 'Uninstall failed' }
-          git archive --format=zip --output=release-out/Playdeck-v6.2.0-source.zip HEAD
+          git archive --format=zip --output=release-out/Playdeck-v6.3.0-source.zip HEAD
           Get-FileHash release-out/* -Algorithm SHA256 | ForEach-Object { $_.Hash.ToLower()+'  '+[IO.Path]::GetFileName($_.Path) } | Set-Content release-out/SHA256SUMS.txt
-          gh release upload v6.2.0 release-out/* --repo DopaLab/playdeck --clobber
+          gh release upload v6.3.0 release-out/* --repo DopaLab/playdeck --clobber
           if ($LASTEXITCODE -ne 0) { throw 'Release upload failed' }

@@ -8,6 +8,19 @@ using System.Text.RegularExpressions;
 using Microsoft.Win32;
 namespace Playdeck.Core;
 public sealed class VersionRecord {
+ public int ReleaseAppId{get;set;}
+ public string GitHubRepository{get;set;}="";
+ public string ConfirmedReleaseSource{get;set;}="";
+ public bool InstalledConfirmed{get;set;}
+ public string LatestVersion{get;set;}="";
+ public string ReleaseSourceKey{get;set;}="";
+ public string ReleaseTitle{get;set;}="";
+ public string ReleaseUrl{get;set;}="";
+ public DateTimeOffset? ReleasePublishedAt{get;set;}
+ public DateTimeOffset? ReleaseCheckedAt{get;set;}
+ public DateTimeOffset? NextReleaseCheckAt{get;set;}
+ public bool NewerUnnumberedRelease{get;set;}
+ public string ReleaseError{get;set;}="";
  public string Mode{get;set;}="Automatic";
  public string EvidencePath{get;set;}="";
  public string DetectedManifestPath{get;set;}="";
@@ -55,8 +68,9 @@ public sealed class BuildCache {
  public string Error{get;set;}="";
 }
 public sealed class GameVersions:IDisposable {
+ readonly ReleaseVersions releases;
  readonly HttpClient http;readonly SemaphoreSlim gate=new(1,1);DateTimeOffset nextRequest;
- public GameVersions(HttpMessageHandler? handler=null){http=handler==null?new HttpClient():new HttpClient(handler);http.Timeout=TimeSpan.FromSeconds(12);http.MaxResponseContentBufferSize=2*1024*1024;http.DefaultRequestHeaders.UserAgent.ParseAdd("Playdeck/6.2 (game-version-check)");}
+ public GameVersions(HttpMessageHandler? handler=null){http=handler==null?new HttpClient():new HttpClient(handler);http.Timeout=TimeSpan.FromSeconds(12);http.MaxResponseContentBufferSize=2*1024*1024;http.DefaultRequestHeaders.UserAgent.ParseAdd("Playdeck/6.3 (game-version-check)");releases=new ReleaseVersions(http);}
  public void Dispose(){http.Dispose();}
  public static int? CompareLabels(string installed,string latest){
   static (BigInteger[] Numbers,string? Pre)? Parse(string text){if(text.Length>120)return null;var m=Regex.Match(text.Trim(),@"\Av?([0-9]+(?:\.[0-9]+){1,3})(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?\z",RegexOptions.CultureInvariant);if(!m.Success||text.Length>120)return null;var a=m.Groups[1].Value.Split('.').Select(BigInteger.Parse).Concat(Enumerable.Repeat(BigInteger.Zero,4)).Take(4).ToArray();return(a,m.Groups[2].Success?m.Groups[2].Value:null);}
@@ -89,7 +103,11 @@ public sealed class GameVersions:IDisposable {
  public static IEnumerable<string> SteamRoots(){var result=new HashSet<string>(StringComparer.OrdinalIgnoreCase);try{using var key=Registry.CurrentUser.OpenSubKey(@"Software\Valve\Steam");if(key?.GetValue("SteamPath") is string path)result.Add(path);}catch{}foreach(var root in result.ToArray()){try{var folders=VdfNode.Parse(ReadText(Path.Combine(root,"steamapps","libraryfolders.vdf"))).Node("libraryfolders");if(folders!=null)foreach(var entry in folders.Children.Values){string p=entry.Text("path");if(p.Length>0)result.Add(p);}}catch{}}return result;}
  public static BuildCache ParseRemote(string json,int appId,DateTimeOffset now){using var doc=JsonDocument.Parse(json,new JsonDocumentOptions{MaxDepth=64});var root=doc.RootElement;if(!root.TryGetProperty("status",out var status)||status.GetString()!="success"||!root.TryGetProperty("data",out var data)||!data.TryGetProperty(appId.ToString(CultureInfo.InvariantCulture),out var app)||!app.TryGetProperty("depots",out var depots)||!depots.TryGetProperty("branches",out var branches))throw new InvalidDataException("Provider returned no build information for this AppID.");var result=new BuildCache{AppId=appId,CheckedAt=now,RetryAfter=now.AddHours(24)};foreach(var branch in branches.EnumerateObject()){if(branch.Value.TryGetProperty("pwdrequired",out var pwd)&&pwd.ToString()=="1")continue;if(branch.Value.TryGetProperty("buildid",out var id)&&ulong.TryParse(id.ToString(),out ulong n)&&n>0)result.Branches[branch.Name]=n.ToString(CultureInfo.InvariantCulture);}return result;}
  public async Task<VersionRecord> Check(Game game,string root,bool online,CancellationToken stop=default){
-  var v=await Task.Run(()=>ReadLocal(game,stop:stop),stop);if(v.Mode is "Manual" or "File"||!v.LocalAvailable||v.AppId<=0||v.InstalledBuild.Length==0||!online)return v;
+  if(game.IsTool)return game.VersionInfo;
+  var v=await Task.Run(()=>ReadLocal(game,stop:stop),stop);
+  // Release labels are independent of installation source. Build IDs keep their legacy path.
+  if(v.InstalledBuild.Length==0)return await releases.Check(game,v,root,online,stop);
+  if(!v.LocalAvailable||v.AppId<=0||!online)return v;
   await gate.WaitAsync(stop);try{string file=Path.Combine(root,"version-cache",v.AppId+".json");BuildCache cache=new(){AppId=v.AppId};try{if(File.Exists(file))cache=JsonSerializer.Deserialize<BuildCache>(ReadText(file),Store.Json)??cache;}catch(Exception e)when(e is IOException or JsonException or InvalidDataException){}if(cache.AppId!=v.AppId||cache.Branches==null)cache=new(){AppId=v.AppId};var now=DateTimeOffset.UtcNow;
    if(cache.RetryAfter<=now){try{var delay=nextRequest-DateTimeOffset.UtcNow;if(delay>TimeSpan.Zero)await Task.Delay(delay,stop);nextRequest=DateTimeOffset.UtcNow.AddSeconds(1);using var response=await http.GetAsync("https://api.steamcmd.net/v1/info/"+v.AppId,stop);if(!response.IsSuccessStatusCode){var retry=response.Headers.RetryAfter;var until=retry?.Date??DateTimeOffset.UtcNow+(retry?.Delta??TimeSpan.FromHours(24));cache.RetryAfter=until>DateTimeOffset.UtcNow.AddHours(24)?until:DateTimeOffset.UtcNow.AddHours(24);response.EnsureSuccessStatusCode();}string json=await response.Content.ReadAsStringAsync(stop);cache=ParseRemote(json,v.AppId,now);}catch(OperationCanceledException)when(stop.IsCancellationRequested){throw;}catch(Exception e)when(e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or InvalidOperationException){cache.Error="Build lookup unavailable; cached evidence retained.";if(cache.RetryAfter<now.AddHours(24))cache.RetryAfter=now.AddHours(24);}stop.ThrowIfCancellationRequested();Store.Atomic(file,cache);}
    v.RemoteCheckedAt=cache.CheckedAt;v.LatestBuild=cache.Branches.FirstOrDefault(p=>p.Key.Equals(v.Branch,StringComparison.OrdinalIgnoreCase)).Value??"";

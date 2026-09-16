@@ -1,35 +1,33 @@
-# Version Watch
+# Local game release tracking
 
-Click the small version chip, press V on a focused card, or open Settings → Version Watch. Choose Find version files, select evidence and confirm Use selected. Review next game moves through unresolved cards; Enter version opens a simple manual form. Online checks are optional; each game can opt into a daily check when the launcher opens. No resident version service is installed.
+## Use it
 
-## Card status
+1. Click a version chip. Your installed copy and the published release are shown side by side.
+2. Enter the version shown inside your game. Alternatively expand Find my installed version, scan the bounded local locations and confirm a version file.
+3. Confirm that the release source matches your PC edition and numbering, then Save & compare.
 
-The compact chip shows only the version (Steam build IDs use a b prefix). Green means a matching comparison within the past 24 hours; yellow means a newer comparable version was reported. Grey means unknown, unverified, unavailable or stale. The tooltip and guided dialog retain the full source/status. Manual latest-version notes must be recently confirmed to produce green; rereading an old note does not renew its authority.
+An existing cover match suggests a publisher feed; it does not prove the installation came from Steam. Release source lets you choose a different game feed without changing artwork, or enter the game's official GitHub repository. Advanced allows a manually researched latest-version note for unsupported publishers. Clear that note to resume online comparison.
 
-## Evidence sources
+## Independent evidence
 
-- **Local files:** version.txt, version, build.txt, build.version, version.json, gameinfo.json, app.info and selected GOG info fields near the game. Epic .item records are matched by installation path. These are suggestions requiring confirmation; engine/schema versions must not be guessed as game releases. GOG info schema version is explicitly excluded. Confirmed files can be reread later.
-- **Manual:** enter installed and latest labels. Numeric dotted versions and prereleases can be ordered; unrelated labels are not guessed.
-- **Executable:** read ProductVersion, falling back to FileVersion, from the actual tracking executable. These fields can describe an engine or launcher rather than the game's release.
-- **Steam:** read appmanifest files in known Steam libraries, matching AppID and installation path. A manually chosen manifest must match the selected AppID. The installed branch is retained; incomplete installations cannot report update availability.
+Installed versions can come from any local installation: a menu/About-screen value, a confirmed version file or executable metadata. Executable values may describe an engine, so they need confirmation. Small nearby files and known Epic/Steam records can be suggested without recursively scanning drives. Missing files retain dated last-known evidence but do not establish a current installation.
 
-A missing source retains dated last-known evidence bound to that game's executable. It is not treated as a currently verified installation. Steam build IDs are never compared with executable version strings.
+Published versions come from Valve's official [ISteamNews API](https://partner.steamgames.com/doc/webapi/ISteamNews), restricted to publisher announcements, or the official [GitHub releases API](https://docs.github.com/en/rest/releases/releases) for a user-selected repository. Neither requires Steam to manage the game. The client sends only a game AppID or repository name, never installation paths or the library file. Opening release notes is an explicit user action.
 
-## Online comparison
+Steam publisher feeds are not a universal latest-version endpoint. The parser uses explicit dotted release labels in recent titles, excludes preview/future/console/DLC titles and ambiguous multiple labels, and keeps the date and source link. A newer unnumbered update blocks a conclusive comparison. It reads at most 100 publisher posts or 30 GitHub releases; missing/older/out-of-window evidence stays uncertain. GitHub draft and prerelease entries are excluded. Different segment counts remain uncomparable rather than treating engine/build numbers as release numbers. Source confirmation is necessary because storefronts and editions can update differently. This cannot guarantee coverage for every local game.
 
-Valve's official [GetAppBuilds endpoint](https://partner.steamgames.com/doc/webapi/ISteamApps) requires publisher credentials and is not a general consumer version service. Playdeck uses the public, third-party [SteamCMD API](https://www.steamcmd.net/) and its [open source implementation](https://github.com/steamcmd/api) for branch build metadata. It sends only the requested AppID, not paths or library contents.
+Legacy Steam manifests still compare build IDs only against the same branch through the third-party [SteamCMD API](https://www.steamcmd.net/). Build IDs never participate in human release-label comparisons.
 
-Successful responses are cached locally for 24 hours. Failed requests back off for at least 24 hours and retain dated evidence without a fresh update claim. Longer Retry-After values are respected. Different uncached requests are paced at least one second apart. Requests are serialized, time out after 12 seconds and have a bounded response size. Protected branches are excluded. Global offline mode performs local checks only.
+## Caching and resource use
 
-A higher reported build is an update hint, not a guarantee about distribution availability. Lower IDs can indicate rollback or branch changes. The provider may lag or be unavailable. No automatic game updater, patch downloader, or arbitrary website scraper is included.
+Successful, empty and failed responses are persisted per release identity for at least 24 hours; longer Retry-After values are honored. Requests are serialized, paced and bounded to 2 MiB/12 seconds. Changing the installed version recalculates against cached release evidence. Offline checks preserve cached evidence. No network or parsing happens in card rendering.
 
-Manifest parsing rejects malformed, duplicate, oversized or deeply nested input. Tests cover AppID binding, branches, incomplete installs, version ordering, cache reuse, network failure and preservation of missing-source evidence.
+Daily checks are opt-in, include manual installed versions, run only while the launcher is active and outside tracked play, and resume after focus returns. A five-minute UI timer checks whether work is due; it performs no network request for a fresh cache. Closing the launcher cancels pending work. No new background service is installed.
 
+Yellow means a compatible newer numbered release was found from a confirmed source; it can remain yellow with a cached-evidence annotation. Green means a recent match to that source, not proof that every storefront is current. Grey asks for a source, an installed version, confirmation or a fresh check. Tiny chips retain their existing content-sized drawing and hit target.
 
-## Bounds and limitations
+## Validation and coverage
 
-Discovery is read-only and off the UI thread. It checks at most four nearby ancestor directories (stopping at shared game folders), up to six candidate directories, 512 Steam manifests across up to 16 known libraries, and 256 Epic records. It never recursively searches drives. Individual evidence files are limited to 256 KiB; parsed Steam evidence is cached with file-change invalidation, at most 512 entries / 4 MiB of source bytes (parsed objects use additional memory).
+Read-only audit on 16 September 2026: 65 active games, 43 with numbered release evidence, 54 with readable installed evidence, zero provider errors. Eighteen had labels accepted by the general numeric comparator, before stricter shape/edition/source checks. These counts are evidence availability, not 43 or 18 verified comparisons. No real-library version settings were changed by the audit.
 
-Confirmed non-Steam versions still need a manually entered latest version: there is no universal public API for every game's human-readable release label. Conflicting or unavailable evidence remains neutral. Only Steam build IDs on the same branch receive automatic online comparisons. No new API key or account is required.
-
-Automatic checks are optional when Playdeck opens and stop on focus loss, launch or a known active play session. They do not install a service or continue after the launcher closes. Tools are excluded from library-wide automatic checks.
+Regression tests exercise local manual-version and file-version lookups, no-Steam GitHub comparison, missing installed evidence, source identity changes, cache reuse/failure/backoff/offline behavior, numbering mismatches, previews, future posts, newer unnumbered updates, and tool exclusion. A live check uses a standalone local-game fixture, not a fabricated Steam manifest.

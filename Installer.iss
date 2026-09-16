@@ -1,4 +1,4 @@
-#define AppVersion "6.2.0"
+#define AppVersion "6.3.0"
 [Setup]
 AppId={{609ECE40-9C04-4AFD-90DF-37535D846D26}
 AppName=Playdeck

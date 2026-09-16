@@ -6,6 +6,7 @@ internal static class Program {
  static int failures, passed;
  static string root=Path.Combine(AppContext.BaseDirectory,"fixtures",Guid.NewGuid().ToString("N"));
  static async Task<int> Main(string[] args){
+  if(args.Length==3&&args[0]=="--release-audit"){await ReleaseTests.Audit(args[1],args[2]);return 0;}
   if(args.Length>0&&args[0]=="--handoff"){var child=new ProcessStartInfo(args[1]){UseShellExecute=false,CreateNoWindow=true};child.ArgumentList.Add("--fixture");child.ArgumentList.Add("6500");using var c=Process.Start(child);await Task.Delay(2500);return 0;}
   if(args.Length>0&&args[0]=="--fixture"){await Task.Delay(args.Length>1?int.Parse(args[1]):6500);return 0;}
   Directory.CreateDirectory(root);
@@ -19,6 +20,7 @@ internal static class Program {
    Test("Focus coverage excludes unknown history",()=>{var game=new Game();var report=ActivityReport.Build(new[]{game},new[]{new Session{GameId=game.Id,Seconds=100},new Session{GameId=game.Id,Seconds=40,HasFocusData=true,ForegroundSeconds=30}},30,DateTime.Today);Assert(report.AllSeconds==140&&report.FocusMeasuredSeconds==40&&report.FocusSeconds==30);});
    Test("Empty analytics are finite and stable",()=>{var report=ActivityReport.Build(Array.Empty<Game>(),Array.Empty<Session>(),30,DateTime.Today);Assert(report.Seconds==0&&report.AverageSession==0&&report.Days.Length==30&&report.Ranking.Length==0);});
    await VersionTests.Run(Test,Assert,root,args.Contains("--network"));
+   await ReleaseTests.Run(Test,Assert,root,args.Contains("--network"));
    Test("Name cleanup",()=>Assert(Names.Clean("Hollow_Knight - Shortcut")=="Hollow Knight"));
    Test("Strict normalization",()=>Assert(Names.Normalize("Hollow Knight™")==Names.Normalize("Hollow Knight")));
    Test("Non-Latin names remain distinguishable",()=>Assert(Names.Normalize("游戏甲")!=Names.Normalize("游戏乙")));

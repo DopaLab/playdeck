@@ -9,7 +9,7 @@
 
 <h3 align="center">Your games deserve a better shelf.</h3>
 <p align="center">A personal Windows launcher with bold cover cards, instant favorites and local play history.<br>No account. No folder crawler. No always-running launcher.</p>
-<p align="center"><b><a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-Setup-6.2.0.exe">↓ Install Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-v6.2.0-win-x64.zip">Portable ZIP</a> · <a href="#your-library-in-motion">See the app</a></b></p>
+<p align="center"><b><a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-Setup-6.3.0.exe">↓ Install Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-v6.3.0-win-x64.zip">Portable ZIP</a> · <a href="#your-library-in-motion">See the app</a></b></p>
 
 ## Your library, in motion
 
@@ -61,20 +61,19 @@ Historical v6.0 → v6.1 synthetic test (see the v6.2 follow-up in the performan
 
 Local synthetic layout measurements, **not GPU frame rates or universal guarantees**. Median scroll updates were 1.2 ms and 1.0 ms. Working-set snapshots were 147 and 151 MiB: this change reduces rendering work and allocation churn, not measured total RAM. See [method and raw results](docs/PERFORMANCE.md).
 
-## Know which version you have
+## Compare your local copy with published releases
 
-Click a card's small version chip (or press **V** on a focused card), or open **Settings → Version Watch**.
+Click the tiny version chip, press **V**, or open **Settings → Version Watch**.
 
-**Find version files → select evidence → Use selected.** Playdeck checks nearby version files and known Steam/Epic installation records. Enter a version from the game's menu when no reliable evidence exists. Review next game helps work through unresolved cards.
+**Enter your installed version → confirm the PC release source → Save & compare.** Playdeck independently fetches numbered publisher announcements, even for games installed outside Steam. Manual installed versions now work with online lookups. You can also confirm a local version file, or choose an official GitHub repository for games without a Steam page.
 
-Small checkered chips show the version: **green** for a recent matching comparison, **yellow** for a newer version, and **grey** for uncertain or stale evidence. They do not stretch across the artwork.
+The dialog places **Your copy** beside **Published release**, with the announcement date, release-notes link, last check and next check. Changing the release source does not alter the card's title or artwork.
 
-- Read confirmed version files on later checks, record versions manually, read executable metadata, or identify a Steam installation even before an AppID has been assigned.
-- Compare matching Steam builds through the third-party SteamCMD API. Results are cached for 24 hours, with a minimum 24-hour retry delay after failures.
-- Opt individual games into checks when Playdeck opens. Update badges and the **Version updates** sort bring reported newer builds forward.
-- Preserve dated last-known evidence when a source disappears. No game files are modified or updates installed.
+Small checkered chips stay compact: **yellow** for a confirmed newer numbered release, **green** for a recent match, **grey** when evidence needs review. A known update stays yellow when cached; an expired match loses green. A newer unnumbered patch prevents an older numbered release from claiming you are current.
 
-Executable version labels and Steam build IDs are different systems. Playdeck never compares them against each other; arbitrary releases need manual latest-version input. Public branch data can lag, and protected branches may be unavailable. [Methods, privacy and limitations](docs/VERSIONS.md).
+Successful, empty and failed online results are cached for at least 24 hours. Daily checks include manually entered versions, resume when the launcher regains focus, and pause during tracked gaming. No resident version service.
+
+This is evidence-based release tracking, not a universal update database. Publisher feeds can omit numbers or use different labels across editions. Those cases show what is missing and offer release notes or a manual latest-version note. [Sources, limits and real-library coverage](docs/VERSIONS.md).
 
 ![Guided version review with demonstration evidence](docs/version-guide.png)
 
@@ -109,7 +108,7 @@ Only games launched **through Playdeck** are tracked. Process lifetime includes 
 
 Exact executable identity and descendants help follow ordinary launcher handoffs. Very short bootstrap processes, elevated/protected games, anti-cheat and storefront reuse may require setting the actual tracking executable. Commercial-game compatibility is not universal. Launch-only and undetected sessions do not invent playtime.
 
-Library, profile, artwork and history live locally. Metadata lookup contacts Steam services/CDNs; enabled version checks also send the game AppID to the third-party SteamCMD API. Online access can be disabled in settings. No telemetry, cloud account or library upload. Empty Trash removes card records; raw sessions, artwork and backups may remain. It is not secure erasure.
+Library, profile, artwork and history live locally. Metadata lookup contacts Steam services/CDNs; release checks send an AppID to Valve publisher news or a repository name to GitHub. Legacy Steam build checks use the third-party SteamCMD API. Online access can be disabled in settings. No telemetry, cloud account or library upload. Empty Trash removes card records; raw sessions, artwork and backups may remain. It is not secure erasure.
 
 ## Build it yourself
 
