@@ -20,6 +20,8 @@ internal static class Program {
    if(Directory.Exists(g.WorkingDirectory))psi.WorkingDirectory=g.WorkingDirectory;
    // The tracker observes process identity; it does not need to retain the shell launch handle.
    Process.Start(psi)?.Dispose();
+   // Lower only the observer after launch; the game keeps its normal launch priority.
+   try{using var observer=Process.GetCurrentProcess();observer.PriorityClass=ProcessPriorityClass.BelowNormal;}catch{}
    var session=new Session{GameId=g.Id,TrackerPid=Environment.ProcessId,TrackerBornUtcTicks=Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks};
    string sessionPath=Path.Combine(request.DataRoot,"sessions",session.Id+".json");
    Store.Atomic(sessionPath,session);
@@ -37,7 +39,7 @@ internal static class Program {
     if(needTree){
     var processes=Snapshot();
     foreach(var p in processes.Values) {
-     bool candidate=ids.ContainsKey(p.Id) || (lineage.TryGetValue(p.Parent,out _) && !before.ContainsKey(p.Id));
+     bool candidate=ids.ContainsKey(p.Id) || (lineage.TryGetValue(p.Parent,out _) && !before.ContainsKey(p.Id) && InGameDirectory(p.Id,g.TrackPath));
      if(!candidate && !before.ContainsKey(p.Id) && string.Equals(p.Exe,Path.GetFileName(g.TrackPath),StringComparison.OrdinalIgnoreCase)) candidate=SamePath(p.Id,g.TrackPath);
      if(Names.Helper(p.Exe) || p.Exe.ToLowerInvariant() is "steam.exe" or "epicgameslauncher.exe" or "galaxyclient.exe") continue;
      if(!candidate)continue;
@@ -69,6 +71,11 @@ internal static class Program {
   } catch(Exception ex){if(request!=null)try{Store.Atomic(request.ReplyPath,new {ok=false,error=ex.Message});}catch{}return 1;}
  }
  static bool IdentityAlive(int id,long born){try{using var p=Process.GetProcessById(id);return !p.HasExited && p.StartTime.ToUniversalTime().Ticks==born;}catch{return false;}}
+ static bool InGameDirectory(int pid,string target){
+  string? directory=Path.GetDirectoryName(target);if(string.IsNullOrWhiteSpace(directory))return false;
+  IntPtr h=OpenProcess(0x1000,false,pid);if(h==IntPtr.Zero)return false;
+  try{var name=new System.Text.StringBuilder(32768);int count=name.Capacity;return QueryFullProcessImageName(h,0,name,ref count)&&Discovery.Within(name.ToString(),directory);}finally{CloseHandle(h);}
+ }
  static bool SamePath(int pid,string target){
   IntPtr h=OpenProcess(0x1000,false,pid);if(h==IntPtr.Zero)return false;
   try{var b=new System.Text.StringBuilder(32768);int n=b.Capacity;return QueryFullProcessImageName(h,0,b,ref n)&&string.Equals(b.ToString(),target,StringComparison.OrdinalIgnoreCase);}finally{CloseHandle(h);}

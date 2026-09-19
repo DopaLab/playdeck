@@ -9,7 +9,7 @@
 
 <h3 align="center">Your games deserve a better shelf.</h3>
 <p align="center">A personal Windows launcher with bold cover cards, instant favorites and local play history.<br>No account. No folder crawler. No always-running launcher.</p>
-<p align="center"><b><a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-Setup-6.3.0.exe">↓ Install Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-v6.3.0-win-x64.zip">Portable ZIP</a> · <a href="#your-library-in-motion">See the app</a></b></p>
+<p align="center"><b><a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-Setup-6.4.0.exe">↓ Install Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-v6.4.0-win-x64.zip">Portable ZIP</a> · <a href="#your-library-in-motion">See the app</a></b></p>
 
 ## Your library, in motion
 
@@ -60,6 +60,18 @@ Historical v6.0 → v6.1 synthetic test (see the v6.2 follow-up in the performan
 | Maximum realized cards | 25 | 25 |
 
 Local synthetic layout measurements, **not GPU frame rates or universal guarantees**. Median scroll updates were 1.2 ms and 1.0 ms. Working-set snapshots were 147 and 151 MiB: this change reduces rendering work and allocation churn, not measured total RAM. See [method and raw results](docs/PERFORMANCE.md).
+
+## Published update dates first
+
+Cards now show compact **UPD** dates from publisher update posts. **REL** identifies the original release date when no update is known. Choose **Last updated / released** to sort the library; manually ordered pins stay in their own order.
+
+In **Settings → Update Radar**, choose **Update date**, **Version**, or **Off**. Dates refresh at most once per 24 hours per source, including empty results and failures. Fetching dates does not scan executables or require an installed version number. Click a chip for the source post and notes. Publisher dates describe online announcements, not your local installation.
+
+Build-date comparison is optional: confirm a valid `YYYY.MM.DD` label and the matching PC source. A later post gives a possible-update hint; dates never prove a copy is current. Version-number tools remain secondary.
+
+**Settings → Playtime tracking** can disable observation entirely: the game starts directly, Playdeck closes, and no tracking helper is started. Existing statistics stay saved. The observer now excludes unrelated child processes outside the game's executable directory and runs below normal priority after launching the game. This does not establish or fix the cause of a reported commercial-game/system crash.
+
+![Published update details with demonstration data](docs/update-date.png)
 
 ## Compare your local copy with published releases
 

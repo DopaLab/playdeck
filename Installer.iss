@@ -1,4 +1,4 @@
-#define AppVersion "6.3.0"
+#define AppVersion "6.4.0"
 [Setup]
 AppId={{609ECE40-9C04-4AFD-90DF-37535D846D26}
 AppName=Playdeck
@@ -30,8 +30,8 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 [Files]
 Source: "Portable\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 [Icons]
-Name: "{autoprograms}\Playdeck"; Filename: "{app}\Playdeck.exe"; WorkingDir: "{app}"
-Name: "{autodesktop}\Playdeck"; Filename: "{app}\Playdeck.exe"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{autoprograms}\Playdeck"; Filename: "{app}\Playdeck.exe"; WorkingDir: "{app}"; IconFilename: "{app}\Playdeck.ico"
+Name: "{autodesktop}\Playdeck"; Filename: "{app}\Playdeck.exe"; WorkingDir: "{app}"; IconFilename: "{app}\Playdeck.ico"; Tasks: desktopicon
 [Run]
 Filename: "{app}\Playdeck.exe"; Parameters: "--install-menu"; Flags: runhidden waituntilterminated
 Filename: "{app}\Playdeck.exe"; Description: "Open Playdeck"; Flags: nowait postinstall skipifsilent unchecked

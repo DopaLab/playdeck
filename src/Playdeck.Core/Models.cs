@@ -44,6 +44,9 @@ public sealed class Library {
  public bool Online {get;set;} = true;
  public bool CompactCards {get;set;}
  public int SortIndex {get;set;}
+ public string CardInfoMode {get;set;} = "Update date";
+ public bool CheckUpdateDates {get;set;} = true;
+ public bool TrackPlaytime {get;set;} = true;
 }
 public sealed class Session {
  public string Id {get;set;} = Guid.NewGuid().ToString("N");

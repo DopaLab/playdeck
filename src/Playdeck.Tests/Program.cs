@@ -7,6 +7,9 @@ internal static class Program {
  static string root=Path.Combine(AppContext.BaseDirectory,"fixtures",Guid.NewGuid().ToString("N"));
  static async Task<int> Main(string[] args){
   if(args.Length==3&&args[0]=="--release-audit"){await ReleaseTests.Audit(args[1],args[2]);return 0;}
+  if(args.Length==2&&args[0]=="--external-child"){
+   var psi=new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System),"WindowsPowerShell","v1.0","powershell.exe")){UseShellExecute=false,CreateNoWindow=true};psi.ArgumentList.Add("-NoProfile");psi.ArgumentList.Add("-Command");psi.ArgumentList.Add("Start-Sleep -Seconds 30");using var child=Process.Start(psi)!;File.WriteAllText(args[1],child.Id.ToString());await Task.Delay(6500);return 0;
+  }
   if(args.Length>0&&args[0]=="--handoff"){var child=new ProcessStartInfo(args[1]){UseShellExecute=false,CreateNoWindow=true};child.ArgumentList.Add("--fixture");child.ArgumentList.Add("6500");using var c=Process.Start(child);await Task.Delay(2500);return 0;}
   if(args.Length>0&&args[0]=="--fixture"){await Task.Delay(args.Length>1?int.Parse(args[1]):6500);return 0;}
   Directory.CreateDirectory(root);
@@ -67,7 +70,7 @@ internal static class Program {
      var absent=new Game{Name="Playdeck No Such Game 94871026"};await metadata.Fetch(absent,root);Test("Unknown title keeps local fallback",()=>Assert(absent.MetadataAttempted&&absent.SteamId==0&&absent.CoverPath==""));
     }
    }
-   if(args.Length>0){string tracker=Path.GetFullPath(args[0]);await TrackerTest(tracker,false);await TrackerTest(tracker,true);await TrackerTest(tracker,false,true);await ToolTest(tracker);}
+   if(args.Length>0){string tracker=Path.GetFullPath(args[0]);await TrackerTest(tracker,false);await TrackerTest(tracker,true);await TrackerTest(tracker,false,true);await ToolTest(tracker);await ExternalChildTest(tracker);}
    Console.WriteLine($"{passed} passed, {failures} failed. Fixtures: {root}");
   }catch(Exception e){Console.WriteLine(e);failures++;}
   return failures==0?0:1;
@@ -87,6 +90,13 @@ internal static class Program {
   Test("Tracker records focus capability and daily totals",()=>Assert(session.HasFocusData&&Math.Abs(session.DailySeconds.Values.Sum()-session.Seconds)<.01&&session.ForegroundSeconds<=session.Seconds));
   Test("Tracker exits after game closes",()=>Assert(p.HasExited));
   Test("Closed fixture game leaves no running process",()=>{var remaining=Process.GetProcessesByName(Path.GetFileNameWithoutExtension(exe));try{Assert(remaining.Length==0);}finally{foreach(var process in remaining)process.Dispose();}});
+ }
+ static async Task ExternalChildTest(string tracker){
+  string data=Path.Combine(root,"external-child");Directory.CreateDirectory(data);string request=Path.Combine(data,"request.json"),reply=Path.Combine(data,"reply.json"),pidFile=Path.Combine(data,"child.pid");string exe=Path.Combine(AppContext.BaseDirectory,"ExitGame-"+Guid.NewGuid().ToString("N")+".exe");File.Copy(Environment.ProcessPath!,exe);
+  Store.Atomic(request,new LaunchRequest{DataRoot=data,ReplyPath=reply,Game=new Game{LaunchPath=exe,TrackPath=exe,Arguments="--external-child \""+pidFile+"\"",WorkingDirectory=AppContext.BaseDirectory}});
+  var psi=new ProcessStartInfo(tracker){UseShellExecute=false,CreateNoWindow=true};psi.ArgumentList.Add(request);using var observer=Process.Start(psi)!;using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(45));await observer.WaitForExitAsync(timeout.Token);
+  using var child=Process.GetProcessById(int.Parse(File.ReadAllText(pidFile)));Test("Unrelated child cannot prolong game tracking after game exit",()=>Assert(!child.HasExited&&Store.Sessions(data).Single().Status=="Completed"));await child.WaitForExitAsync(timeout.Token);
+  int directPid=ToolLaunch.Start(new Game{LaunchPath=exe,Arguments="--fixture 2500",WorkingDirectory=AppContext.BaseDirectory});using var direct=Process.GetProcessById(directPid);await direct.WaitForExitAsync(timeout.Token);Test("Direct game launch exits independently and creates no new tracked session",()=>Assert(Store.Sessions(data).Count==1&&direct.HasExited));
  }
  static void Test(string name,Action action){try{action();passed++;Console.WriteLine("PASS "+name);}catch(Exception e){failures++;Console.WriteLine("FAIL "+name+": "+e.Message);}}
  static void Assert(bool condition){if(!condition)throw new Exception("Assertion failed");}

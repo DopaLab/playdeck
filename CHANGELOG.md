@@ -1,5 +1,15 @@
 # Changelog
 
+## 6.4.0 — 2026-09-19
+
+- Remove PINNED banners from cards; preserve the Pinned section and manual ordering.
+- Put published update dates first: compact date chips, last updated/released sorting, source-note dialog and settings for date/version/off. Date checks reuse the daily cache without scanning installed files.
+- Keep version numbers secondary. Add opt-in calendar build-date hints; a later post suggests review, never proves update availability or up-to-date installation.
+- Add tracking-off direct launch with no observer; preserve existing statistics. Restrict observed descendants to the game executable directory and lower observer priority only after launching the game.
+- Preserve offline unnumbered-update evidence, filter promotional/development titles, and batch library saves during date checks.
+- Enlarge existing icon artwork by about 8 percent inside Windows resources, with nine sizes from 16 to 256 pixels. Preserve the supplied design.
+- Validate unrelated-child process exit and direct launch. Commercial-game crashes remain unconfirmed; no driver/system settings are changed.
+
 ## 6.3.0 — 2026-09-16
 
 - Rebuild local-game comparison around independent installed and published versions. Manual/file versions reach publisher news without any Steam installation or BuildID; support official GitHub releases as an alternate source.

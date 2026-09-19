@@ -20,7 +20,7 @@ public sealed class ReleaseVersions(HttpClient http) {
  readonly SemaphoreSlim gate=new(1,1);
  DateTimeOffset nextRequest;
  static readonly Regex number=new(@"(?<![\w.])v?(\d+(?:\.\d+){1,3})(?![\w.])",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(100));
- static readonly Regex excluded=new(@"\b(beta|alpha|preview|experimental|test(?:ing)?|upcoming|coming|soon|planned|announc(?:e|ed|ement)|roadmap|tomorrow|next week|playtest|demo|soundtrack|DLC|Nintendo|Switch|Xbox|PlayStation|PS[345]|Android|iOS|Linux|macOS)\b",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(100));
+ static readonly Regex excluded=new(@"\b(development|devlog|community|sale|discount|giveaway|livestream|contest|merch|survey|recap|beta|alpha|preview|experimental|test(?:ing)?|upcoming|coming|soon|planned|announc(?:e|ed|ement)|roadmap|tomorrow|next week|playtest|demo|soundtrack|DLC|Nintendo|Switch|Xbox|PlayStation|PS[345]|Android|iOS|Linux|macOS)\b",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(100));
  static readonly Regex releaseWords=new(@"\b(patch|hotfix|update|version|release|released)\b",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(100));
  public static string Repository(string value){
   value=value.Trim().TrimEnd('/');
@@ -62,13 +62,13 @@ public sealed class ReleaseVersions(HttpClient http) {
   }else throw new InvalidDataException("Choose a supported release source.");
   result.Items=result.Items.OrderByDescending(x=>x.PublishedAt).Take(30).ToList();return result;
  }
- public static void Apply(VersionRecord v,string key,ReleaseCache cache){
+ public static void Apply(VersionRecord v,string key,ReleaseCache cache,bool compare=true){
   v.ReleaseSourceKey=key;v.ReleaseCheckedAt=cache.CheckedAt;v.NextReleaseCheckAt=cache.RetryAfter;v.ReleaseError=cache.Error;
   var numbered=cache.Items.FirstOrDefault(x=>x.Version.Length>0);var recent=cache.Items.FirstOrDefault();
   v.LatestVersion=numbered?.Version??"";v.NewerUnnumberedRelease=recent!=null&&(numbered==null||recent.PublishedAt>numbered.PublishedAt);
   var shown=v.NewerUnnumberedRelease?recent:numbered;
   v.ReleaseTitle=shown?.Title??"";v.ReleaseUrl=shown?.Url??"";v.ReleasePublishedAt=shown?.PublishedAt;
-  Compare(v);
+  if(compare)Compare(v);
  }
  public static void Compare(VersionRecord v){
   v.NeedsUpdate=false;v.MatchesLatest=false;
@@ -91,9 +91,9 @@ public sealed class ReleaseVersions(HttpClient http) {
   v.Status=result>0?"Newer release found":result==0?"Matches latest numbered release":result<0?"Installed version is newer than this source":"Different numbering · check release notes";
   if(v.ReleaseError.Length>0)v.Status+=" · cached";
  }
- public async Task<VersionRecord> Check(Game game,VersionRecord v,string root,bool online,CancellationToken stop){
+ public async Task<VersionRecord> Check(Game game,VersionRecord v,string root,bool online,CancellationToken stop,bool compare=true){
   string key=SourceKey(game);
-  if(key.Length==0){Clear(v);Compare(v);return v;}
+  if(key.Length==0){Clear(v);if(compare)Compare(v);v.NextReleaseCheckAt=DateTimeOffset.UtcNow.AddHours(24);return v;}
   await gate.WaitAsync(stop);
   try{
    string file=Path.Combine(root,"release-cache",Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(key)))+".json");
@@ -101,7 +101,7 @@ public sealed class ReleaseVersions(HttpClient http) {
    try{if(File.Exists(file)&&new FileInfo(file).Length<=2*1024*1024){var saved=JsonSerializer.Deserialize<ReleaseCache>(File.ReadAllText(file),Store.Json);if(saved?.Key==key&&saved.Items!=null)cache=saved;}}
    catch(Exception e)when(e is IOException or UnauthorizedAccessException or JsonException){}
    // A moved portable library can still use evidence stored in its game record.
-   if(!cache.CheckedAt.HasValue&&v.ReleaseSourceKey==key&&v.ReleaseCheckedAt.HasValue){cache.CheckedAt=v.ReleaseCheckedAt;cache.RetryAfter=v.NextReleaseCheckAt??DateTimeOffset.MinValue;if(v.LatestVersion.Length>0&&!v.NewerUnnumberedRelease)cache.Items.Add(new(v.LatestVersion,v.ReleaseTitle,v.ReleaseUrl,v.ReleasePublishedAt??DateTimeOffset.MinValue));}
+   if(!cache.CheckedAt.HasValue&&v.ReleaseSourceKey==key&&v.ReleaseCheckedAt.HasValue){cache.CheckedAt=v.ReleaseCheckedAt;cache.RetryAfter=v.NextReleaseCheckAt??DateTimeOffset.MinValue;if(v.ReleasePublishedAt.HasValue){if(v.NewerUnnumberedRelease&&v.LatestVersion.Length>0)cache.Items.Add(new(v.LatestVersion,"Previously found numbered release",v.ReleaseUrl,DateTimeOffset.MinValue));cache.Items.Insert(0,new(v.NewerUnnumberedRelease?"":v.LatestVersion,v.ReleaseTitle,v.ReleaseUrl,v.ReleasePublishedAt.Value));}}
    var now=DateTimeOffset.UtcNow;
    if(online&&cache.RetryAfter<=now){
     try{
@@ -114,7 +114,7 @@ public sealed class ReleaseVersions(HttpClient http) {
     catch(Exception e)when(e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or InvalidOperationException){cache.Error="Could not reach or read the release provider. Saved evidence is retained; retry after "+now.AddHours(24).ToLocalTime().ToString("g")+".";if(cache.RetryAfter<now.AddHours(24))cache.RetryAfter=now.AddHours(24);}
     stop.ThrowIfCancellationRequested();Store.Atomic(file,cache);
    }
-   Apply(v,key,cache);if(!online)v.ReleaseError="Offline · showing saved release evidence.";
+   Apply(v,key,cache,compare);if(!online)v.ReleaseError="Offline · showing saved release evidence.";
    v.Detail+="\nRelease source: "+key+". Publisher labels are independent of where this game was installed. Confirm the PC edition and numbering before comparing.";
    return v;
   }finally{gate.Release();}

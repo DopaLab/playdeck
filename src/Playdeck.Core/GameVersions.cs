@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using Microsoft.Win32;
 namespace Playdeck.Core;
 public sealed class VersionRecord {
+ public bool CompareBuildDate{get;set;}
+ public string ConfirmedBuildDate{get;set;}="";
  public int ReleaseAppId{get;set;}
  public string GitHubRepository{get;set;}="";
  public string ConfirmedReleaseSource{get;set;}="";
@@ -72,6 +74,10 @@ public sealed class GameVersions:IDisposable {
  readonly HttpClient http;readonly SemaphoreSlim gate=new(1,1);DateTimeOffset nextRequest;
  public GameVersions(HttpMessageHandler? handler=null){http=handler==null?new HttpClient():new HttpClient(handler);http.Timeout=TimeSpan.FromSeconds(12);http.MaxResponseContentBufferSize=2*1024*1024;http.DefaultRequestHeaders.UserAgent.ParseAdd("Playdeck/6.3 (game-version-check)");releases=new ReleaseVersions(http);}
  public void Dispose(){http.Dispose();}
+ public Task<VersionRecord> CheckUpdates(Game game,string root,bool online,CancellationToken stop=default){
+  var copy=JsonSerializer.Deserialize<VersionRecord>(JsonSerializer.Serialize(game.VersionInfo,Store.Json),Store.Json)!;
+  return game.IsTool?Task.FromResult(copy):releases.Check(game,copy,root,online,stop,false);
+ }
  public static int? CompareLabels(string installed,string latest){
   static (BigInteger[] Numbers,string? Pre)? Parse(string text){if(text.Length>120)return null;var m=Regex.Match(text.Trim(),@"\Av?([0-9]+(?:\.[0-9]+){1,3})(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?\z",RegexOptions.CultureInvariant);if(!m.Success||text.Length>120)return null;var a=m.Groups[1].Value.Split('.').Select(BigInteger.Parse).Concat(Enumerable.Repeat(BigInteger.Zero,4)).Take(4).ToArray();return(a,m.Groups[2].Success?m.Groups[2].Value:null);}
   var a=Parse(installed);var b=Parse(latest);if(a==null||b==null)return installed.Trim().Equals(latest.Trim(),StringComparison.OrdinalIgnoreCase)?0:null;for(int i=0;i<4;i++){int c=b.Value.Numbers[i].CompareTo(a.Value.Numbers[i]);if(c!=0)return c;}if(a.Value.Pre==b.Value.Pre)return 0;if(a.Value.Pre==null)return -1;if(b.Value.Pre==null)return 1;var ap=a.Value.Pre.Split('.');var bp=b.Value.Pre.Split('.');for(int i=0;i<Math.Min(ap.Length,bp.Length);i++){bool an=BigInteger.TryParse(ap[i],out var ai),bn=BigInteger.TryParse(bp[i],out var bi);int c=an&&bn?bi.CompareTo(ai):an!=bn?(bn?-1:1):string.Compare(bp[i],ap[i],StringComparison.Ordinal);if(c!=0)return c;}return bp.Length.CompareTo(ap.Length);

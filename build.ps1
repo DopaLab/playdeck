@@ -13,6 +13,7 @@ try {
  & src/Playdeck.Tests/bin/Release/net10.0-windows/Playdeck.Tests.exe Portable/Playdeck.Tracker.exe
  if ($LASTEXITCODE -ne 0) { throw 'Regression tests failed' }
  New-Item -ItemType Directory -Force Portable/LICENSES | Out-Null
+ Copy-Item src/Playdeck/app.ico Portable/Playdeck.ico -Force
  Copy-Item README.md Portable/README.md -Force
  Copy-Item LICENSE,THIRD_PARTY_NOTICES.md,CHANGELOG.md Portable -Force
  New-Item -ItemType Directory -Force Portable/docs | Out-Null

@@ -27,11 +27,11 @@ public sealed partial class MainWindow:Window {
  readonly StackPanel content=new(); readonly TextBlock status=new(); readonly TextBlock pageTitle=new();
  readonly Dictionary<string,Button> navigation=[];
  readonly TextBox search=new(){Width=245,HorizontalAlignment=HorizontalAlignment.Left,ToolTip="Search your library",Margin=new Thickness(0,0,12,0)};
- readonly ComboBox sort=new(){ItemsSource=new[]{"Recently played","Most played","Most launched","Date added","Release date","Title A–Z","Version updates"},SelectedIndex=0};
+ readonly ComboBox sort=new(){ItemsSource=new[]{"Recently played","Most played","Most launched","Date added","Release date","Title A–Z","Version updates (optional)","Last updated / released"},SelectedIndex=0};
  
  List<Session> sessions=[]; string view="Library"; bool enriching, compact;  readonly string? capture;
  public MainWindow(string dataRoot,bool demoMode,string? capturePath,string? initialLaunch=null){
-  root=dataRoot;demo=demoMode;capture=capturePath;library=Store.Load(root);sessions=Store.Sessions(root);compact=library.CompactCards;sort.SelectedIndex=Math.Clamp(library.SortIndex,0,6);
+  root=dataRoot;demo=demoMode;capture=capturePath;library=Store.Load(root);sessions=Store.Sessions(root);compact=library.CompactCards;sort.SelectedIndex=Math.Clamp(library.SortIndex,0,7);
   Title="Playdeck — Your next good game";Background=Brush("#101510");Foreground=Brush("#F1F3EB");FontFamily=new FontFamily("Segoe UI Variable Text");Width=1240;Height=820;MinWidth=960;MinHeight=600;WindowStartupLocation=WindowStartupLocation.CenterScreen;
   if(demo&&library.Games.Count==0)SeedDemo();if(!demo){foreach(var game in library.Games.Where(g=>g.Removed&&!g.TrashedAt.HasValue))game.TrashedAt=DateTimeOffset.UtcNow;LibraryActions.ExpireTrash(library,DateTimeOffset.UtcNow);Save();}
   BuildShell(); Render();SizeChanged+=(_,_)=>{if(IsLoaded){resizeTimer.Stop();resizeTimer.Start();}};resizeTimer.Tick+=(_,_)=>{resizeTimer.Stop();Render();};PreviewKeyDown+=(_,e)=>{if(e.Key==System.Windows.Input.Key.Escape&&selectionMode){selectionMode=false;selected.Clear();Render();e.Handled=true;}};
@@ -100,6 +100,7 @@ public sealed partial class MainWindow:Window {
   if(demo&&toolStartProbe==null){MessageBox.Show(this,"This is an isolated visual demo. Add your own game to the regular library to launch it.","Demo library");return;}
   if(!File.Exists(g.LaunchPath)){MessageBox.Show(this,"The launch file is missing. Choose a new launch file in Edit, or archive the game.","Game unavailable");return;}
   if(g.IsTool){try{if(toolStartProbe!=null)toolStartProbe(g);else ToolLaunch.Start(g);status.Text="Opened "+g.Name+" · tool mode, no play tracking.";}catch(Exception ex){MessageBox.Show(this,ex.Message,"Could not open tool");}return;}
+  if(!library.TrackPlaytime){try{ToolLaunch.Start(g);Close();}catch(Exception ex){MessageBox.Show(this,ex.Message,"Could not launch game");}return;}
   if(string.IsNullOrWhiteSpace(g.TrackPath)){
    if(MessageBox.Show(this,"This shortcut does not expose the game's executable. The launch will be recorded, but playtime will not be estimated.\n\nFor playtime, choose the game's executable in Edit → Tracking executable. Launch now?","Launch tracking",MessageBoxButton.YesNo)!=MessageBoxResult.Yes)return;
   }
