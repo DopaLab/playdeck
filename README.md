@@ -1,136 +1,179 @@
-<p align="center"><img src="docs/hero.png" alt="Playdeck — Less waiting. More playing." width="100%"></p>
+<p align="center"><img src="docs/hero.png" alt="Playdeck — Less waiting. More playing. Your library. One click." width="100%"></p>
 
 <p align="center">
-<a href="https://github.com/DopaLab/playdeck/releases/latest"><img src="https://img.shields.io/github/v/release/DopaLab/playdeck?style=for-the-badge&color=E1FF46&labelColor=222222" alt="Latest release"></a>
-<img src="https://img.shields.io/badge/Windows-x64-76DDD3?style=for-the-badge&labelColor=222222" alt="Windows x64">
-<img src="https://img.shields.io/badge/Native-WPF-FF957F?style=for-the-badge&labelColor=222222" alt="Native WPF">
-<a href="https://ko-fi.com/fgtranime"><img src="https://img.shields.io/badge/Support-Ko--fi-FF5E5B?style=for-the-badge&labelColor=222222" alt="Support on Ko-fi"></a>
+<a href="https://github.com/DopaLab/playdeck/releases/tag/v7.0.7"><img src="https://img.shields.io/badge/PLAYDECK-7.0.7-E1FF46?style=for-the-badge&labelColor=202025" alt="Playdeck 7.0.7"></a>
+<img src="https://img.shields.io/badge/WINDOWS-x64-76DDD3?style=for-the-badge&labelColor=202025" alt="Windows x64">
+<img src="https://img.shields.io/badge/BUILT-NATIVE-FF957F?style=for-the-badge&labelColor=202025" alt="Native Windows app">
+<a href="https://ko-fi.com/fgtranime"><img src="https://img.shields.io/badge/SUPPORT-KO--FI-C7B7FF?style=for-the-badge&labelColor=202025" alt="Support on Ko-fi"></a>
 </p>
 
-<h3 align="center">Your games deserve a better shelf.</h3>
-<p align="center">A personal Windows launcher with bold cover cards, instant favorites and local play history.<br>No account. No folder crawler. No always-running launcher.</p>
-<p align="center"><b><a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-Setup-6.4.0.exe">↓ Install Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/releases/latest/download/Playdeck-v6.4.0-win-x64.zip">Portable ZIP</a> · <a href="#your-library-in-motion">See the app</a></b></p>
+<h2 align="center">Your collection should make you want to play.</h2>
+<p align="center">Bold covers. One-click launching. A history worth keeping.<br><b>A personal Windows game launcher that gets out of the way when the game begins.</b></p>
+<p align="center"><a href="https://github.com/DopaLab/playdeck/releases/download/v7.0.7/Playdeck-Setup-7.0.7.exe"><img src="https://img.shields.io/badge/INSTALL_PLAYDECK-7.0.7-E1FF46?style=for-the-badge&labelColor=202025" alt="Download Playdeck 7.0.7"></a></p>
+<p align="center"><a href="#see-your-next-session">See it in action</a> · <a href="#the-whole-deck">Every feature</a> · <a href="#install-in-four-steps">Get started</a> · <a href="https://github.com/DopaLab/playdeck/issues">Report an issue</a></p>
 
-## Your library, in motion
+> **No Playdeck account. Local library and history. No always-running launcher.**
+> Add the games you choose, give them a beautiful home, and launch. A separate optional helper records the session and exits afterward.
 
-![Actual Playdeck library with demonstration games](docs/library.png)
+## See your next session
+
+<img src="docs/screenshots-707/library.png" alt="Installed Playdeck 7.0.7 with Far Cry Primal, Katana ZERO, Dungeons and Degenerate Gamblers, and Dice A Million" width="100%">
+<p align="center"><sub>Real installed Playdeck 7.0.7. The creator’s own library, profile and recorded activity—not demonstration data.</sub></p>
 
 <table>
-<tr><td width="50%"><b>01 / Make it yours</b><br>Right-click a game in Explorer → Add to Playdeck. Choose a Steam match for artwork, or paste your own cover. Your profile, your order, your library.</td><td width="50%"><b>02 / Get straight to the game</b><br>Click a card to launch. Use its three dots to edit. Pin favorites to a separate shelf and drag them into order. The launcher closes after a successful launch.</td></tr>
-<tr><td><b>03 / Keep your story</b><br>Playtime, 7/30/90-day comparisons, a 90-day calendar, focus ring, game rankings and session history. New sessions distinguish foreground from background time and split across midnight.</td><td><b>04 / Keep it recoverable</b><br>Archive without losing cached art or history. Trash cards for seven days, restore mistakes, or empty the trash. Installed game files are never deleted.</td></tr>
+<tr><td width="50%"><h3>🟡 A shelf, with personality</h3>Cover-first cards, a manually ordered Pinned shelf, expressive upright typography and dark illustrated backgrounds. Your games are the point of the interface.</td><td width="50%"><h3>🟢 One click to the good part</h3>Click a card to play. Three dots to edit. Playdeck closes after a successful game launch. Utilities have a separate shelf and keep the launcher open.</td></tr>
+<tr><td><h3>🟣 A collection with a memory</h3>First played, last played, focus time, session history and your journey through a game. Archive its story even after its installation is gone.</td><td><h3>🟠 A reason to come back</h3>Library news, patch notes, daily player reviews and related-game discovery. Cached editions keep browsing quiet between daily refreshes.</td></tr>
 </table>
 
-<details open><summary><b>Activity & favorites — actual application captures</b></summary>
+## Your playtime tells a story
 
-| Your play story | Your instant-play shelf |
-|:--:|:--:|
-| ![Activity](docs/activity.png) | ![Pinned games](docs/pinned.png) |
+<img src="docs/screenshots-707/activity.png" alt="Actual activity dashboard: 25.6 recorded hours, 45 sessions, daily playtime and foreground share" width="100%">
+
+**Your Play / Pulse** brings together 7-, 30- and 90-day views, daily bars, active days, game rankings, a play calendar and foreground/background time. **Your Journey** adds first and last launch dates, elapsed calendar time and an optional completion marker. Export sessions to CSV to explore the numbers yourself.
+
+The archive is a museum: clicking an archived card opens its journey. It does not try to start a missing executable, scan an uninstalled game or discard your history.
+
+## Stay close to the games you care about
+
+<img src="docs/screenshots-707/news.png" alt="Actual news page with a Boulder Smash player review, an Up Next queue and library news below" width="100%">
+
+| Channel | What you get |
+|:--|:--|
+| **For you** | A daily mix of player reviews, publisher updates and gaming headlines. |
+| **Library** | News for matched games in your collection; optionally include archived games. |
+| **Game updates** | Patch and update posts, with links to the original details. |
+| **Reviews** | Player perspectives on games to discover, with attribution and recommendations. |
+| **Gaming news** | Choose built-in RSS publications or add your own feed. |
+| **More Like This** | Games Steam relates to matched library titles, with artwork, descriptions, the connection and a store link. |
+
+Reviews rotate automatically. Hover or focus to pause; select a queued review to hold it for reading. Click the main review to expand the text. Stories open in your default browser; small game icons on update cards open the game’s store page.
+
+Saved stories appear first. Daily editions follow your **local calendar day**, with cached artwork and bounded requests. Publisher dates remain the publisher’s dates. Steam Spotlight has been removed.
+
+## Why choose Playdeck?
+
+For players with games across local folders and storefronts, Playdeck brings together a distinctive cover-first interface, direct launching, personal history and daily discovery in one native Windows app.
+
+| What matters | The Playdeck approach |
+|:--|:--|
+| **Start playing quickly** | Direct card launching, Explorer integration and a dedicated favorites shelf. |
+| **Stay in control** | Add what you choose. No broad folder crawler filling the library with helper executables. |
+| **Keep the visual identity** | Bold typography, cached covers, designed fallbacks and coordinated dark backgrounds. |
+| **Do less background work** | Native WPF, virtualized grids, reused decoded artwork, indexed history and cached online results. |
+| **Remember games after uninstalling** | Archived artwork, icons and activity survive independently of game files. |
+| **Keep your data yours** | Local storage, no Playdeck sign-in, no telemetry and no cloud library upload. |
+
+That combination is the reason to try it—not an untested claim of superiority over every launcher, game or PC.
+
+## The whole deck
+
+<details open>
+<summary><b>01 / Library, artwork & personal style</b></summary>
+
+- Add executables and shortcuts through **Explorer → Add to Playdeck**, the file picker or drag-and-drop.
+- Click cards to launch; use their three-dot menu to edit. Search without leaving the grid.
+- Continuous scrolling, compact/comfortable card sizes, and portrait/landscape cover support.
+- Sort by recent play, playtime, launch count, date added, release date, name or last published update/release.
+- Pin favorites to their own shelf and drag them into your preferred order.
+- Choose a Steam title match to apply its name and artwork. Completed lookups are cached.
+- Paste cover art from the clipboard or choose a local image. Unmatched games retain a designed fallback with their centered local icon.
+- Customize your profile picture and username. No level grind.
+- Eight dark typographic tab backgrounds; News adds restrained color and Activity adds analytical motifs.
+- Original artwork by default; optional **Soft white**, **Urban graffiti** and **Sunlight glass** finishes.
+- Compact playtime and last-played labels cover hours, days, months and years.
+- Square opaque icons receive rounded corners; shaped icons keep their outline.
 
 </details>
 
-<details><summary><b>Fallback artwork, settings & title matching</b></summary>
+<details>
+<summary><b>02 / Sessions, activity & your journey</b></summary>
 
-![Cards without downloaded covers](docs/fallback.png)
-
-| Settings | Choose the right game |
-|:--:|:--:|
-| ![Settings](docs/settings.png) | ![Steam matching](docs/matching.png) |
+- Optional tracking for games launched through Playdeck: first/last launch, session count and duration.
+- Foreground/background time, 7/30/90-day views, daily bars, active days, rankings and a play calendar.
+- Per-game journey, elapsed calendar span and an optional completion marker.
+- Separate session helper: the launcher can close while recording continues; the helper exits after the tracked game finishes.
+- Long sleep-gap exclusion, periodic recovery checkpoints and session CSV export.
+- Disable observation entirely while retaining existing history.
+- **Software** shelf for tools/utilities. Their launches keep Playdeck open, create no game sessions and stay out of game analytics and game shelves.
 
 </details>
 
-The banner is AI-generated promotional art. Application images are real WPF captures with demonstration data; game artwork belongs to its respective owners.
+<details>
+<summary><b>03 / News, discovery & update awareness</b></summary>
+
+- Publisher news and patch notes for matched library games, with optional archive inclusion.
+- Daily player reviews with attribution, recommendations, full-image artwork and an expandable reader.
+- Automatic rotation, hover/focus pause and click-to-hold review selection.
+- Configurable gaming RSS sources, custom feeds and a designed thumbnail fallback.
+- **More Like This** recommendations related to owned games, with descriptions and store links.
+- Local-day editions, disk caches and in-memory reuse between tab visits.
+- Mature-content screening; third-party feeds cannot be guaranteed perfectly classified.
+- Compact update-date chips and **Last updated / released** sorting.
+- Compare publisher dates with your installation baseline. **Mark updated** renews that baseline without erasing play history.
+- Secondary version tools: manual values, executable/local-file evidence, Steam identity/build evidence where available, and supported publisher/GitHub release sources.
+- Open original announcements to inspect changes. Uncertain comparisons remain uncertain.
+
+</details>
+
+<details>
+<summary><b>04 / Preservation, recovery & everyday control</b></summary>
+
+- Archive artwork, icons and activity independently of an installation. Archived cards open the journey and are not launched or scanned for installed files.
+- Explicitly restore an archived game to the active library.
+- Remove cards through selection mode or Delete-click. Recover them from Trash for seven days, or empty Trash.
+- Reset Library requires typing **RESET**; cards move to recoverable Trash. Game files are untouched.
+- Open a game’s exact saved file location in Explorer.
+- **Update game location** reconnects a moved executable/shortcut while keeping card identity, art and history.
+- Per-user installer, optional desktop shortcut, Start menu entry and Explorer integration.
+- Standard Windows uninstall; personal library data is intentionally retained.
+- Built-in Ko-fi support link.
+
+</details>
 
 ## Built to do less work
 
-- **Continuous, virtualized scrolling:** nearby cards are drawn on lightweight surfaces; overlapping rows survive updates and up to 72 nearby controls are reused (or more if needed for the visible viewport). Idle work prewarms adjacent rows.
-- **Decoded artwork reuse:** frozen bitmaps in a bounded 48 MiB / 160-entry LRU cache. File changes invalidate entries. This is a cache budget, not a total RAM promise.
-- **Indexed history:** cards look up their game's sessions instead of repeatedly scanning the entire history.
-- **Quieter UI:** focus changes reload history only when the session directory changes; resizing coalesces expensive rebuilds.
-- **No idle tracker:** a separate helper runs during a launched game, checkpoints every 30 seconds, and exits afterward. No boot service or scheduled task.
-- **Cached metadata:** completed lookups and failures are remembered; manual Steam search results are cached for one day.
+The grid realizes nearby cards instead of constructing the whole library. Overlapping rows reuse controls; cover art uses frozen decoded bitmaps in a **48 MiB / 160-entry LRU cache**. History is indexed by game and tab backgrounds use a bounded brush cache. These are implementation budgets, not a total-RAM promise.
 
-Historical v6.0 → v6.1 synthetic test (see the v6.2 follow-up in the performance document): 2,000 games, 20,000 sessions, eight preloaded covers, five refreshes and 100 scroll steps.
+Online lookups cache results and failures. News refreshes by local day; release/version checks use their own cached schedules and provider backoff. There is no boot service, scheduled tracking task or permanently running Playdeck launcher. The optional observer exists for launched game sessions.
 
-| WPF workload | v6.0 | v6.1 |
-|---|---:|---:|
-| Median library refresh | 130 ms | 40 ms |
-| 95th-percentile scroll layout update | 23.6 ms | 12.3 ms |
-| Managed allocation during workload | 29.8 MiB | 15.1 MiB |
-| Repeated image decodes | 0 | 0 |
-| Maximum realized cards | 25 | 25 |
+Historical measurements are in [Performance](docs/PERFORMANCE.md). They are not benchmarks of 7.0.7 or universal frame-rate, memory or launch-time guarantees.
 
-Local synthetic layout measurements, **not GPU frame rates or universal guarantees**. Median scroll updates were 1.2 ms and 1.0 ms. Working-set snapshots were 147 and 151 MiB: this change reduces rendering work and allocation churn, not measured total RAM. See [method and raw results](docs/PERFORMANCE.md).
+## Install in four steps
 
-## Published update dates first
+1. Download **[Playdeck-Setup-7.0.7.exe](https://github.com/DopaLab/playdeck/releases/download/v7.0.7/Playdeck-Setup-7.0.7.exe)**. Windows x64; .NET is included.
+2. Install for your Windows account. Choose whether to add a desktop shortcut.
+3. Right-click a game executable or shortcut → **Add to Playdeck**. Windows 11 may place this under **Show more options**. The in-app **Add game** button also works.
+4. Check the title/artwork and click the card to play.
 
-Cards now show compact **UPD** dates from publisher update posts. **REL** identifies the original release date when no update is known. Choose **Last updated / released** to sort the library; manually ordered pins stay in their own order.
+Upgrade with the installer. Uninstall through **Windows Settings → Apps**. Your library, profile, artwork and history remain in `%LOCALAPPDATA%\Playdeck`. This community build is unsigned; the release includes its SHA-256 checksum.
 
-In **Settings → Update Radar**, choose **Update date**, **Version**, or **Off**. Dates refresh at most once per 24 hours per source, including empty results and failures. Fetching dates does not scan executables or require an installed version number. Click a chip for the source post and notes. Publisher dates describe online announcements, not your local installation.
+**7.0.7 validation:** 154 offline regression checks, 133 installed-app UI checks, plus fresh-install, upgrade, uninstall and real-library-preservation checks passed. Screenshots above were captured separately from the creator’s actual installation. Tests do not establish compatibility with every commercial game.
 
-Build-date comparison is optional: confirm a valid `YYYY.MM.DD` label and the matching PC source. A later post gives a possible-update hint; dates never prove a copy is current. Version-number tools remain secondary.
+## Good to know
 
-**Settings → Playtime tracking** can disable observation entirely: the game starts directly, Playdeck closes, and no tracking helper is started. Existing statistics stay saved. The observer now excludes unrelated child processes outside the game's executable directory and runs below normal priority after launching the game. This does not establish or fix the cause of a reported commercial-game/system crash.
+<details>
+<summary><b>Tracking, updates and privacy</b></summary>
 
-![Published update details with demonstration data](docs/update-date.png)
+Only games launched through Playdeck are tracked. Process lifetime includes pauses; foreground time means the game owned the foreground window, not proof of active input. Sampling/checkpoints make durations approximate. Sleep gaps are excluded; interrupted sessions can lose time since the last checkpoint. Protected/elevated games, anti-cheat, reused storefront processes and short bootstrap programs can need a manually selected tracking executable. Observation can be disabled.
 
-## Compare your local copy with published releases
+In update-date mode, green means no known publisher post is newer than your confirmed baseline; yellow asks you to review a newer post. **Mark updated** records your confirmation. Playdeck does not download patches or verify every game’s files. Version comparisons depend on compatible local and publisher evidence.
 
-Click the tiny version chip, press **V**, or open **Settings → Version Watch**.
+Artwork matching can send a title or Steam AppID. Feeds and recommendations contact Steam, selected publishers/CDNs, configured RSS sources and supported release providers. Optional legacy build checks use SteamCMD’s third-party API. Your library database and session history are not uploaded. Online options can be disabled. Games may still require their own storefront accounts.
 
-**Enter your installed version → confirm the PC release source → Save & compare.** Playdeck independently fetches numbered publisher announcements, even for games installed outside Steam. Manual installed versions now work with online lookups. You can also confirm a local version file, or choose an official GitHub repository for games without a Steam page.
+Use **Update game location** to reconnect moved games; arbitrary disk moves are not automatically discovered. Trash affects launcher records, not installed games; artwork, backups or raw history may remain, so it is not secure erasure.
 
-The dialog places **Your copy** beside **Published release**, with the announcement date, release-notes link, last check and next check. Changing the release source does not alter the card's title or artwork.
+</details>
 
-Small checkered chips stay compact: **yellow** for a confirmed newer numbered release, **green** for a recent match, **grey** when evidence needs review. A known update stays yellow when cached; an expired match loses green. A newer unnumbered patch prevents an older numbered release from claiming you are current.
+<details>
+<summary><b>About the public source snapshot</b></summary>
 
-Successful, empty and failed online results are cached for at least 24 hours. Daily checks include manually entered versions, resume when the launcher regains focus, and pause during tracked gaming. No resident version service.
+7.0.7 is an **installer release**. The newer application source is not published. Existing public code and historical build instructions remain as an older snapshot; they do not reproduce 7.0.7. GitHub’s automatic “Source code” downloads contain that repository snapshot, not the private 7.0.7 source. See the [license for existing public code](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
-This is evidence-based release tracking, not a universal update database. Publisher feeds can omit numbers or use different labels across editions. Those cases show what is missing and offer release notes or a manual latest-version note. [Sources, limits and real-library coverage](docs/VERSIONS.md).
+</details>
 
-![Guided version review with demonstration evidence](docs/version-guide.png)
+---
 
-## Install & play
-
-1. Download the installer from [Releases](https://github.com/DopaLab/playdeck/releases/latest). Windows x64; the .NET runtime is included.
-2. Install for your Windows account. Start menu and Explorer integration are included; the desktop shortcut is optional.
-3. Right-click a game executable or shortcut → **Add to Playdeck**. On Windows 11, use **Show more options**. File picking and drag-and-drop also work.
-4. Review the name, choose a cover match if needed, and click its card to play.
-
-Uninstall through **Windows Settings → Apps**. Data in `%LOCALAPPDATA%\Playdeck` is intentionally retained, including during upgrades. The portable ZIP uses that same location. This is an **unsigned** community build; release hashes are supplied for integrity checking.
-
-## A few useful details
-
-| Action | How |
-|---|---|
-| Edit a card | Three dots in its upper corner |
-| Paste a cover | Ctrl+V in the editor |
-| Correct a title / find artwork | Find cover or Choose Steam match; select a result to apply it |
-| Rearrange favorites | Drag cards in Pinned; other library sorts work independently |
-| Remove junk cards | Select mode, or hold Delete while clicking a card |
-| Start a fresh library | Settings; old cards move to recoverable trash |
-| Export history | Settings → CSV, including focus time and session status |
-| Customize profile | Click the player badge |
-| Gaming utility / mod manager | Settings → Manage tools, or Mark as tool in its card editor |
-
-### Tracking & privacy
-
-**Tool mode** opens utilities independently, keeps Playdeck open and creates no play sessions. Existing tool history is retained but excluded from game analytics. Square opaque game icons receive rounded corners; transparent or shaped icons keep their outlines.
-
-Only games launched **through Playdeck** are tracked. Process lifetime includes pauses; foreground time means the game owned the foreground window, not proof of active input. Sampling is every two seconds, so durations are approximate. Sleep gaps of ten seconds or more are excluded. Interrupted runs retain the last checkpoint, potentially losing about 30 seconds. Older sessions keep their original totals and use their start date in daily charts.
-
-Exact executable identity and descendants help follow ordinary launcher handoffs. Very short bootstrap processes, elevated/protected games, anti-cheat and storefront reuse may require setting the actual tracking executable. Commercial-game compatibility is not universal. Launch-only and undetected sessions do not invent playtime.
-
-Library, profile, artwork and history live locally. Metadata lookup contacts Steam services/CDNs; release checks send an AppID to Valve publisher news or a repository name to GitHub. Legacy Steam build checks use the third-party SteamCMD API. Online access can be disabled in settings. No telemetry, cloud account or library upload. Empty Trash removes card records; raw sessions, artwork and backups may remain. It is not secure erasure.
-
-## Build it yourself
-
-Requires Windows, [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), and [Inno Setup 6.7+](https://jrsoftware.org/isinfo.php) for the installer.
-
-```powershell
-./build.ps1            # Self-contained portable build + regression tests
-./build.ps1 -Installer # Also compile the installer
-```
-
-The UI and tracker publish separately. Only tracker-specific binaries are copied into the app directory, preserving WPF's WindowsBase runtime. See [validation](docs/VALIDATION.md), [changelog](CHANGELOG.md), [MIT code license](LICENSE) and [asset notices](THIRD_PARTY_NOTICES.md).
-
-<p align="center"><b>Made for the moment you actually want to play.</b><br><a href="https://ko-fi.com/fgtranime">☕ Support development on Ko-fi</a> · <a href="https://github.com/DopaLab/playdeck/issues">Report a bug</a></p>
+<h2 align="center">Made for the moment you actually want to play.</h2>
+<p align="center">If Playdeck earns a place on your desktop, <b>give the project a star</b>.<br>Share it with a friend whose games deserve a better home, or help shape the next release with a useful bug report.</p>
+<p align="center"><a href="https://github.com/DopaLab/playdeck/releases/tag/v7.0.7">↓ Get Playdeck</a> · <a href="https://github.com/DopaLab/playdeck/issues">Report a bug</a> · <a href="https://ko-fi.com/fgtranime">☕ Support on Ko-fi</a></p>
+<p align="center"><sub>Hero: AI-assisted promotional composition using cover artwork from the creator’s actual library. Application screenshots: unretouched captures of installed 7.0.7. Game art, names, reviews and publisher content belong to their respective owners; no endorsement is implied.</sub></p>
